@@ -1,61 +1,55 @@
-import { api } from './api';
+import api from './api';
 import type { Driver, DriverStatus } from '../types';
 
-function mapBackendToFrontend(bd: any): Driver {
-  return {
-    id: bd.id,
-    name: bd.name,
-    phone: bd.contact_number,
-    email: `${bd.name.toLowerCase().replace(/\s+/g, '')}@transitops.com`,
-    licenseNumber: bd.license_number,
-    licenseExpiry: bd.license_expiry,
-    status: bd.status,
-    rating: Number((bd.safety_score / 20).toFixed(1)), // 0-100 rating to 0-5
-    totalTrips: 0,
-    joiningDate: bd.created_at ? bd.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-    address: 'HQ Terminal',
-    emergencyContact: '+1-555-0199',
-    createdAt: bd.created_at || new Date().toISOString(),
-  };
-}
-
-function mapFrontendToBackend(d: any) {
-  return {
-    name: d.name,
-    contact_number: d.phone,
-    license_number: d.licenseNumber,
-    license_expiry: d.licenseExpiry,
-    license_category: d.licenseCategory || 'CDL-A',
-    safety_score: d.rating ? d.rating * 20 : 100.0,
-    status: d.status,
-  };
-}
+const mapDriver = (d: any): Driver => ({
+  id: d.id,
+  name: d.name,
+  phone: d.contact_number,
+  email: '',
+  licenseNumber: d.license_number,
+  licenseExpiry: d.license_expiry,
+  status: d.status as DriverStatus,
+  rating: d.safety_score,
+  totalTrips: 0,
+  joiningDate: d.created_at,
+  address: '',
+  emergencyContact: '',
+  createdAt: d.created_at,
+});
 
 export const driverService = {
   async getAll(): Promise<Driver[]> {
     const res = await api.get('/drivers/');
-    const items = Array.isArray(res.data) ? res.data : (res.data.items || []);
-    return items.map(mapBackendToFrontend);
+    return res.data.items.map(mapDriver);
   },
 
   async getById(id: string): Promise<Driver | null> {
     const res = await api.get(`/drivers/${id}`);
-    return mapBackendToFrontend(res.data);
+    return mapDriver(res.data);
   },
 
-  async create(data: Omit<Driver, 'id' | 'createdAt'>): Promise<Driver> {
-    const payload = mapFrontendToBackend(data);
-    const res = await api.post('/drivers/', payload);
-    return mapBackendToFrontend(res.data);
+  async create(data: { name: string; licenseNumber: string; licenseCategory: string; licenseExpiry: string; contactNumber: string; safetyScore?: number }): Promise<Driver> {
+    const res = await api.post('/drivers/', {
+      name: data.name,
+      license_number: data.licenseNumber,
+      license_category: data.licenseCategory,
+      license_expiry: data.licenseExpiry,
+      contact_number: data.contactNumber,
+      safety_score: data.safetyScore ?? 100.0,
+    });
+    return mapDriver(res.data);
   },
 
-  async update(id: string, data: Partial<Omit<Driver, 'id' | 'createdAt'>>): Promise<Driver> {
-    const existing = await api.get(`/drivers/${id}`);
-    const updatedPayload = {
-      ...mapFrontendToBackend({ ...mapBackendToFrontend(existing.data), ...data }),
-    };
-    const res = await api.put(`/drivers/${id}`, updatedPayload);
-    return mapBackendToFrontend(res.data);
+  async update(id: string, data: Partial<{ name: string; licenseNumber: string; licenseExpiry: string; contactNumber: string; status: DriverStatus; safetyScore: number }>): Promise<Driver> {
+    const payload: any = {};
+    if (data.name) payload.name = data.name;
+    if (data.licenseNumber) payload.license_number = data.licenseNumber;
+    if (data.licenseExpiry) payload.license_expiry = data.licenseExpiry;
+    if (data.contactNumber) payload.contact_number = data.contactNumber;
+    if (data.status) payload.status = data.status;
+    if (data.safetyScore !== undefined) payload.safety_score = data.safetyScore;
+    const res = await api.put(`/drivers/${id}`, payload);
+    return mapDriver(res.data);
   },
 
   async delete(id: string): Promise<void> {
@@ -63,15 +57,6 @@ export const driverService = {
   },
 
   async updateStatus(id: string, status: DriverStatus): Promise<Driver> {
-    return this.update(id, { status });
-  },
-
-  // Internal compatibility helpers
-  _updateStatusSync(id: string, status: DriverStatus): void {
-    // No-op for compatibility as real backend handles state transitions
-  },
-
-  _getAll(): Driver[] {
-    return [];
+    return driverService.update(id, { status });
   },
 };

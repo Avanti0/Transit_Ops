@@ -1,88 +1,58 @@
-import { api } from './api';
-import type { MaintenanceLog } from '../types';
+import api from './api';
+import type { MaintenanceLog, MaintenanceStatus } from '../types';
 
-function mapBackendToFrontend(bm: any): MaintenanceLog {
-  return {
-    id: bm.id,
-    vehicleId: bm.vehicle_id,
-    type: bm.maintenance_type as any,
-    description: bm.description || bm.issue || '',
-    status: bm.status === 'Active' ? 'In Progress' : 'Completed',
-    reportedDate: bm.start_date,
-    completedDate: bm.end_date || undefined,
-    technicianName: 'Internal Staff',
-    cost: bm.cost,
-    createdAt: bm.created_at || new Date().toISOString(),
-    mileageAtService: 0,
-  };
-}
-
-function mapFrontendToBackend(m: any) {
-  return {
-    vehicle_id: m.vehicleId,
-    maintenance_type: m.type,
-    issue: m.description ? m.description.slice(0, 100) : 'Standard Maintenance',
-    description: m.description,
-    cost: Number(m.cost || 0),
-    start_date: m.reportedDate || new Date().toISOString().split('T')[0],
-    end_date: m.completedDate || null,
-  };
-}
+const mapMaintenance = (m: any): MaintenanceLog => ({
+  id: m.id,
+  vehicleId: m.vehicle_id,
+  type: m.maintenance_type as any,
+  description: m.description ?? m.issue,
+  status: m.status as MaintenanceStatus,
+  reportedDate: m.start_date,
+  completedDate: m.end_date ?? undefined,
+  technicianName: '',
+  cost: m.cost,
+  mileageAtService: 0,
+  notes: m.issue,
+  createdAt: m.created_at,
+});
 
 export const maintenanceService = {
   async getAll(): Promise<MaintenanceLog[]> {
     const res = await api.get('/maintenance/');
-    const items = Array.isArray(res.data) ? res.data : (res.data.items || []);
-    return items.map(mapBackendToFrontend);
+    return res.data.items.map(mapMaintenance);
   },
 
   async getById(id: string): Promise<MaintenanceLog | null> {
     const res = await api.get(`/maintenance/${id}`);
-    return mapBackendToFrontend(res.data);
+    return mapMaintenance(res.data);
   },
 
   async getByVehicle(vehicleId: string): Promise<MaintenanceLog[]> {
-    const all = await this.getAll();
-    return all.filter((l) => l.vehicleId === vehicleId);
+    const res = await api.get('/maintenance/', { params: { vehicle_id: vehicleId } });
+    return res.data.items.map(mapMaintenance);
   },
 
-  async create(data: Omit<MaintenanceLog, 'id' | 'createdAt'>): Promise<MaintenanceLog> {
-    const payload = mapFrontendToBackend(data);
-    const res = await api.post('/maintenance/', payload);
-    return mapBackendToFrontend(res.data);
-  },
-
-  async update(
-    id: string,
-    data: Partial<Omit<MaintenanceLog, 'id' | 'createdAt'>>,
-  ): Promise<MaintenanceLog> {
-    const existing = await api.get(`/maintenance/${id}`);
-    const updatedPayload = {
-      ...mapFrontendToBackend({ ...mapBackendToFrontend(existing.data), ...data }),
-    };
-    // Close or fallback
-    const res = await api.patch(`/maintenance/${id}/close`, {
-      end_date: updatedPayload.end_date || new Date().toISOString().split('T')[0],
-      cost: updatedPayload.cost,
-      description: updatedPayload.description,
+  async create(data: { vehicleId: string; maintenanceType: string; issue: string; description?: string; cost?: number; startDate: string }): Promise<MaintenanceLog> {
+    const res = await api.post('/maintenance/', {
+      vehicle_id: data.vehicleId,
+      maintenance_type: data.maintenanceType,
+      issue: data.issue,
+      description: data.description,
+      cost: data.cost ?? 0,
+      start_date: data.startDate,
     });
-    return mapBackendToFrontend(res.data);
+    return mapMaintenance(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    // Delete is not supported explicitly by backend route, no-op or complete it
-    await api.patch(`/maintenance/${id}/close`, {
-      end_date: new Date().toISOString().split('T')[0],
-    });
+    await api.delete(`/maintenance/${id}`);
   },
 
-  async completeMaintenance(id: string): Promise<MaintenanceLog> {
-    const existing = await api.get(`/maintenance/${id}`);
+  async completeMaintenance(id: string, endDate?: string, cost?: number): Promise<MaintenanceLog> {
     const res = await api.patch(`/maintenance/${id}/close`, {
-      end_date: new Date().toISOString().split('T')[0],
-      cost: existing.data.cost,
-      description: existing.data.description,
+      end_date: endDate ?? new Date().toISOString().split('T')[0],
+      cost,
     });
-    return mapBackendToFrontend(res.data);
+    return mapMaintenance(res.data);
   },
 };
