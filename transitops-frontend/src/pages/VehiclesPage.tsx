@@ -34,7 +34,6 @@ import { vehicleService } from '../services/vehicleService';
 import { tripService } from '../services/tripService';
 import type { Vehicle, VehicleStatus, VehicleType, FuelType, Trip } from '../types';
 import { cn } from '../lib/utils';
-import { AppLayout } from '../layouts/AppLayout';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
