@@ -1,7 +1,7 @@
 import enum
 import uuid
 import datetime
-from sqlalchemy import String, Date, Float, DateTime, Enum, CheckConstraint, func, UUID
+from sqlalchemy import String, Date, Float, DateTime, Enum, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 from backend.database.base import Base
 
@@ -18,10 +18,10 @@ class Driver(Base):
     """
     __tablename__ = "drivers"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid.uuid4,
+        default=lambda: str(uuid.uuid4()),
         doc="Unique identifier (UUID) for the driver"
     )
     

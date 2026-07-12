@@ -1,7 +1,7 @@
 import enum
 import uuid
 import datetime
-from sqlalchemy import String, Date, Float, DateTime, Enum, CheckConstraint, ForeignKey, func, UUID
+from sqlalchemy import String, Date, Float, DateTime, Enum, CheckConstraint, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database.base import Base
 
@@ -16,15 +16,15 @@ class Maintenance(Base):
     """
     __tablename__ = "maintenance_logs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
-        default=uuid.uuid4,
+        default=lambda: str(uuid.uuid4()),
         doc="Unique identifier (UUID) for the maintenance log"
     )
     
-    vehicle_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+    vehicle_id: Mapped[str] = mapped_column(
+        String(36),
         ForeignKey("vehicles.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

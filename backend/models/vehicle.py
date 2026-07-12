@@ -1,7 +1,7 @@
 import enum
 import uuid
 import datetime
-from sqlalchemy import String, Float, DateTime, Enum, CheckConstraint, func, UUID
+from sqlalchemy import String, Float, DateTime, Enum, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database.base import Base
 
@@ -16,7 +16,7 @@ class VehicleStatus(str, enum.Enum):
 class Vehicle(Base):
     __tablename__ = "vehicles"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     registration_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     vehicle_type: Mapped[str] = mapped_column(String(50), nullable=False)

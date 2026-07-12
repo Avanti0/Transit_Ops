@@ -1,6 +1,6 @@
+import uuid
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -48,7 +48,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.id == user_id).first()
+    try:
+        user_uuid = uuid.UUID(user_id)  # validate format only
+    except (ValueError, AttributeError):
+        raise credentials_exception
+    user = db.query(User).filter(User.id == str(user_uuid)).first()
     if user is None:
         raise credentials_exception
     return user
