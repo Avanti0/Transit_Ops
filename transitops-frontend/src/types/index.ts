@@ -132,6 +132,7 @@ export interface KPIData {
   totalDrivers: number;
   availableDrivers: number;
   activeTrips: number;
+  pendingTrips: number;
   completedTripsThisMonth: number;
   totalExpensesThisMonth: number;
   fuelCostThisMonth: number;

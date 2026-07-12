@@ -30,11 +30,11 @@ export const fuelService = {
     return res.data.items.map(mapFuelLog);
   },
 
-  async create(data: { vehicleId: string; liters: number; cost: number; date: string }): Promise<FuelLog> {
+  async create(data: any): Promise<FuelLog> {
     const res = await api.post('/fuel/', {
       vehicle_id: data.vehicleId,
       liters: data.liters,
-      cost: data.cost,
+      cost: data.totalCost ?? data.cost ?? (data.liters * (data.pricePerLiter ?? 0)),
       date: data.date,
     });
     return mapFuelLog(res.data);
