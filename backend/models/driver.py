@@ -1,8 +1,8 @@
 import enum
 import uuid
 import datetime
-from sqlalchemy import String, Date, Float, DateTime, Enum, CheckConstraint, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Date, Float, DateTime, Enum, CheckConstraint, ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database.base import Base
 
 class DriverStatus(str, enum.Enum):
@@ -23,6 +23,15 @@ class Driver(Base):
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
         doc="Unique identifier (UUID) for the driver"
+    )
+
+    user_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=True,
+        unique=True,
+        index=True,
+        doc="Links this driver record to a User login account"
     )
     
     name: Mapped[str] = mapped_column(
@@ -95,6 +104,8 @@ class Driver(Base):
             name="check_driver_safety_score_range"
         ),
     )
+
+    user: Mapped["User | None"] = relationship("User", foreign_keys=[user_id], lazy="select")
 
     def __repr__(self) -> str:
         return (

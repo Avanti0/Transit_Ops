@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Pencil, Trash2, Plus, Search, Truck, Loader2, X } from 'lucide-react';
+import { Pencil, Trash2, Plus, Search, Truck, Loader2, X, Bus } from 'lucide-react';
 import { toast } from 'sonner';
+import { AppLayout } from '../layouts/AppLayout';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/Label';
@@ -30,7 +31,8 @@ import {
 import { Card, CardContent } from '../components/ui/Card';
 import { StatusBadge } from '../components/StatusBadge';
 import { vehicleService } from '../services/vehicleService';
-import type { Vehicle, VehicleStatus, VehicleType, FuelType } from '../types';
+import { tripService } from '../services/tripService';
+import type { Vehicle, VehicleStatus, VehicleType, FuelType, Trip } from '../types';
 import { cn } from '../lib/utils';
 import { AppLayout } from '../layouts/AppLayout';
 
@@ -158,9 +160,15 @@ function FieldError({ msg }: { msg?: string }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function VehiclesPage() {
+  // Detect if current user is a driver
+  const rawUser = localStorage.getItem('transitops_user');
+  const user = rawUser ? (JSON.parse(rawUser) as { role: string }) : null;
+  const isDriver = user?.role === 'Driver/Dispatcher';
+
   // Data
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [driverVehicle, setDriverVehicle] = useState<Vehicle | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -183,14 +191,25 @@ export default function VehiclesPage() {
   const loadVehicles = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await vehicleService.getAll();
-      setVehicles(data);
+      if (isDriver) {
+        // For drivers: get their active trip to find assigned vehicle
+        const myTrips = await tripService.getMyTrips();
+        const activeTrip = myTrips.find((t) => t.status === 'Dispatched');
+        if (activeTrip) {
+          const v = await vehicleService.getById(activeTrip.vehicleId);
+          setDriverVehicle(v);
+        }
+        setVehicles([]);
+      } else {
+        const data = await vehicleService.getAll();
+        setVehicles(data);
+      }
     } catch (err) {
       toast.error('Failed to load vehicles');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isDriver]);
 
   useEffect(() => {
     loadVehicles();
@@ -306,6 +325,87 @@ export default function VehiclesPage() {
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
+  // Driver view: show only their assigned vehicle
+  if (isDriver) {
+    return (
+      <AppLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">My Vehicle</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Vehicle assigned to you</p>
+        </div>
+
+        <Card>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            </div>
+          ) : !driverVehicle ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4 text-center px-6">
+              <div className="bg-slate-100 rounded-full p-5">
+                <Bus className="h-10 w-10 text-slate-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-slate-700">No vehicle assigned</h3>
+                <p className="text-sm text-slate-400 mt-1">
+                  You don't have an active trip with an assigned vehicle.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Registration</TableHead>
+                  <TableHead>Make / Model</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Capacity</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Fuel Type</TableHead>
+                  <TableHead className="text-right">Mileage (km)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <span className="font-mono font-semibold text-slate-800">
+                      {driverVehicle.registrationNumber}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium text-slate-800">{driverVehicle.make}</p>
+                      <p className="text-xs text-slate-500">
+                        {driverVehicle.model} · {driverVehicle.year}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-slate-700">{driverVehicle.type}</span>
+                  </TableCell>
+                  <TableCell className="text-right font-medium text-slate-700">
+                    {driverVehicle.capacity}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={driverVehicle.status} />
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-slate-700">{driverVehicle.fuelType}</span>
+                  </TableCell>
+                  <TableCell className="text-right text-slate-700">
+                    {driverVehicle.currentMileage.toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          )}
+        </Card>
+      </div>
+      </AppLayout>
+    );
+  }
+
+  // Admin/Manager view: full vehicle registry
   return (
     <AppLayout>
       <div className="space-y-6">

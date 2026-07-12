@@ -1,14 +1,30 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Optional
 import uuid
 from backend.database.session import get_db
 from backend.models.trip import Trip, TripStatus
+from backend.models.driver import Driver
+from backend.models.user import User
 from backend.schemas.trip import TripCreate, TripComplete, TripResponse
 from backend.utils.auth import get_current_user
 from backend.services import trip_service
 
 router = APIRouter(prefix="/trips", tags=["Trips"])
+
+
+@router.get("/my", response_model=list[TripResponse])
+def get_my_trips(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Returns trips assigned to the current driver (matched via user_id on driver record).
+    """
+    driver = db.query(Driver).filter(Driver.user_id == current_user.id).first()
+    if not driver:
+        raise HTTPException(status_code=404, detail="No driver profile linked to this account")
+    return db.query(Trip).filter(Trip.driver_id == driver.id).all()
 
 
 @router.get("/", response_model=list[TripResponse])

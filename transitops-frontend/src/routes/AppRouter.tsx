@@ -17,6 +17,7 @@ const FuelPage = React.lazy(() => import('../pages/FuelPage'));
 const ExpensesPage = React.lazy(() => import('../pages/ExpensesPage'));
 const ReportsPage = React.lazy(() => import('../pages/ReportsPage'));
 const AnalyticsPage = React.lazy(() => import('../pages/AnalyticsPage'));
+const DriverTripsPage = React.lazy(() => import('../pages/DriverTripsPage'));
 
 // ─── Fallback spinner ─────────────────────────────────────────────────────────
 function PageLoader() {
@@ -25,6 +26,14 @@ function PageLoader() {
       <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
     </div>
   );
+}
+
+/** Redirects to /vehicles for drivers, /dashboard for everyone else */
+function RootRedirect() {
+  const raw = localStorage.getItem('transitops_user');
+  const user = raw ? JSON.parse(raw) as { role?: string } : null;
+  const dest = user?.role === 'Driver/Dispatcher' ? '/vehicles' : '/dashboard';
+  return <Navigate to={dest} replace />;
 }
 
 // ─── Router ───────────────────────────────────────────────────────────────────
@@ -36,8 +45,8 @@ export function AppRouter() {
           {/* Public */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Root redirect */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Root redirect — driver goes to vehicles, others to dashboard */}
+          <Route path="/" element={<RootRedirect />} />
 
           {/* Protected routes */}
           <Route
@@ -112,9 +121,17 @@ export function AppRouter() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/my-trips"
+            element={
+              <ProtectedRoute>
+                <DriverTripsPage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* Catch-all — same smart redirect */}
+          <Route path="*" element={<RootRedirect />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

@@ -36,17 +36,27 @@ from backend.database.session import SessionLocal, engine
 from backend.database.base import Base
 from backend.models.vehicle import Vehicle, VehicleStatus
 from backend.models.driver import Driver, DriverStatus
+from backend.models.trip import Trip, TripStatus
 from backend.models.maintenance import Maintenance, MaintenanceStatus
 from backend.models.fuel_log import FuelLog
 from backend.models.expense import Expense, ExpenseType
 
-# CSV file paths mapping to backend/data/
+# CSV file paths — prefer *_dataset.csv (real data), fall back to legacy names
 DATA_DIR = Path(__file__).parent.parent / "data"
-VEHICLES_CSV = DATA_DIR / "vehicles.csv"
-DRIVERS_CSV = DATA_DIR / "drivers.csv"
-MAINTENANCE_CSV = DATA_DIR / "maintenance.csv"
-FUEL_LOGS_CSV = DATA_DIR / "fuel_logs.csv"
-EXPENSES_CSV = DATA_DIR / "expenses.csv"
+
+def _pick(names):
+    for n in names:
+        p = DATA_DIR / n
+        if p.exists() and p.stat().st_size > 10:
+            return p
+    return DATA_DIR / names[-1]
+
+VEHICLES_CSV  = _pick(["vehicle_dataset.csv", "vehicles.csv"])
+DRIVERS_CSV   = _pick(["drivers_dataset.csv", "drivers.csv"])
+TRIPS_CSV     = _pick(["Trips_dataset.csv", "trips.csv"])
+MAINTENANCE_CSV = _pick(["Maintanence_dataset.csv", "maintenance.csv"])
+FUEL_LOGS_CSV = _pick(["FuelLog_Dataset.csv", "fuel_logs.csv"])
+EXPENSES_CSV  = _pick(["Expenses_dataset.csv", "expenses.csv"])
 
 
 def get_db_session() -> Session:
@@ -632,6 +642,95 @@ def seed_expenses(db: Session) -> Tuple[int, int]:
     return inserted, skipped
 
 
+def seed_trips(db: Session) -> Tuple[int, int]:
+    """
+    Seeds trips from Trips_dataset.csv. Flushes changes and returns (inserted, skipped).
+    CSV columns: vehicle_registration_number, driver_name, source_city, destination_city,
+                 cargo_weight, planned_distance, actual_distance, fuel_used, revenue, status, date
+    """
+    if not TRIPS_CSV.exists():
+        return 0, 0
+
+    vehicles = db.query(Vehicle).all()
+    vehicle_map = {v.registration_number: v.id for v in vehicles}
+
+    drivers = db.query(Driver).all()
+    driver_map = {d.name: d.id for d in drivers}
+
+    inserted = 0
+    skipped = 0
+
+    with open(TRIPS_CSV, "r", encoding="utf-8", errors="replace") as f:
+        reader = csv.DictReader(f)
+        if not reader.fieldnames:
+            return 0, 0
+
+        for row in reader:
+            try:
+                reg = row["vehicle_registration_number"].strip()
+                v_id = vehicle_map.get(reg)
+                if not v_id:
+                    skipped += 1
+                    continue
+
+                d_name = row["driver_name"].strip()
+                d_id = driver_map.get(d_name)
+                if not d_id:
+                    skipped += 1
+                    continue
+
+                status_str = row.get("status", "Draft").strip()
+                try:
+                    status_val = TripStatus(status_str)
+                except ValueError:
+                    status_val = TripStatus.DRAFT
+
+                source = row.get("source_city", "").strip() or "Unknown"
+                dest = row.get("destination_city", "").strip() or "Unknown"
+                cargo = float(row.get("cargo_weight", 0) or 0)
+                planned = float(row.get("planned_distance", 0) or 0)
+                actual = float(row["actual_distance"]) if row.get("actual_distance") and row["actual_distance"].strip() else None
+                fuel = float(row["fuel_used"]) if row.get("fuel_used") and row["fuel_used"].strip() else None
+                rev = float(row.get("revenue", 0) or 0)
+
+                date_str = row.get("date", "").strip()
+                created_at = datetime.datetime.fromisoformat(date_str) if date_str else datetime.datetime.utcnow()
+                completed_at = created_at if status_val == TripStatus.COMPLETED else None
+
+                # Skip duplicates by matching vehicle + source + dest + date
+                dup = db.query(Trip).filter(
+                    Trip.vehicle_id == v_id,
+                    Trip.source == source,
+                    Trip.destination == dest,
+                ).first()
+                if dup:
+                    skipped += 1
+                    continue
+
+                trip = Trip(
+                    vehicle_id=v_id,
+                    driver_id=d_id,
+                    source=source,
+                    destination=dest,
+                    cargo_weight=cargo,
+                    planned_distance=planned,
+                    actual_distance=actual,
+                    fuel_consumed=fuel,
+                    revenue=rev,
+                    status=status_val,
+                    created_at=created_at,
+                    completed_at=completed_at,
+                )
+                db.add(trip)
+                inserted += 1
+            except Exception:
+                skipped += 1
+                continue
+
+    db.flush()
+    return inserted, skipped
+
+
 def main():
     """
     Command Line Interface entry point.
@@ -660,6 +759,7 @@ def main():
         # Default seeding counts
         v_ins, v_skip = 0, 0
         d_ins, d_skip = 0, 0
+        t_ins, t_skip = 0, 0
         m_ins, m_skip = 0, 0
         f_ins, f_skip = 0, 0
         e_ins, e_skip = 0, 0
@@ -672,6 +772,10 @@ def main():
         if run_all or args.drivers:
             print("[INFO] Seeding Drivers...")
             d_ins, d_skip = seed_drivers(db)
+
+        if run_all:
+            print("[INFO] Seeding Trips...")
+            t_ins, t_skip = seed_trips(db)
             
         if run_all or args.maintenance:
             print("[INFO] Seeding Maintenance logs...")
@@ -699,6 +803,8 @@ def main():
             print(f"Vehicles: {v_ins} inserted, {v_skip} skipped")
         if run_all or args.drivers:
             print(f"Drivers: {d_ins} inserted, {d_skip} skipped")
+        if run_all:
+            print(f"Trips: {t_ins} inserted, {t_skip} skipped")
         if run_all or args.maintenance:
             print(f"Maintenance: {m_ins} inserted, {m_skip} skipped")
         if run_all or args.fuel:

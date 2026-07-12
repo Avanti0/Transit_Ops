@@ -1,17 +1,32 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 import uuid
 from backend.database.session import get_db
 from backend.schemas.driver import DriverCreate, DriverUpdate, DriverResponse, DriverPaginatedResponse
-from backend.models.driver import DriverStatus
+from backend.models.driver import Driver, DriverStatus
+from backend.models.user import User
 from backend.services.driver import DriverService
-from backend.utils.auth import require_roles
+from backend.utils.auth import require_roles, get_current_user
 
 router = APIRouter(prefix="/drivers", tags=["Drivers"])
 
 # RBAC Dependency: Fleet Manager and Safety Officer only
 rbac_dependency = Depends(require_roles("Fleet Manager", "Safety Officer"))
+
+@router.get("/me", response_model=DriverResponse)
+def get_my_driver_profile(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Returns the driver profile linked to the current user's account.
+    Only works for users whose role is Driver/Dispatcher.
+    """
+    driver = db.query(Driver).filter(Driver.user_id == current_user.id).first()
+    if not driver:
+        raise HTTPException(status_code=404, detail="No driver profile linked to this account")
+    return driver
 
 @router.post("/", response_model=DriverResponse, status_code=status.HTTP_201_CREATED)
 def create_driver(

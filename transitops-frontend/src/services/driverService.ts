@@ -18,6 +18,15 @@ const mapDriver = (d: any): Driver => ({
 });
 
 export const driverService = {
+  async getMe(): Promise<Driver | null> {
+    try {
+      const res = await api.get('/drivers/me');
+      return mapDriver(res.data);
+    } catch {
+      return null;
+    }
+  },
+
   async getAll(): Promise<Driver[]> {
     const res = await api.get('/drivers/');
     return res.data.items.map(mapDriver);

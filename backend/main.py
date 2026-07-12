@@ -1,3 +1,4 @@
+import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.database.base import Base
@@ -10,9 +11,19 @@ from backend.utils.exceptions import register_exception_handlers
 
 Base.metadata.create_all(bind=engine)
 
+# ─── Migrate: add user_id column to drivers table if missing ────────────────────
+from sqlalchemy import text, inspect
+_inspector = inspect(engine)
+_drv_cols = {c["name"] for c in _inspector.get_columns("drivers")} if "drivers" in _inspector.get_table_names() else set()
+if "user_id" not in _drv_cols:
+    with engine.begin() as _conn:
+        _conn.execute(text('ALTER TABLE drivers ADD COLUMN user_id VARCHAR(36) REFERENCES users(id)'))
+    print("Migration: added user_id column to drivers table")
+
 # Auto-seed roles and users if not present
 from backend.database.session import SessionLocal
 from backend.models.user import Role, User
+from backend.models.driver import Driver
 from backend.utils.auth import hash_password
 db = SessionLocal()
 try:
@@ -42,6 +53,35 @@ try:
                     role_id=role_id
                 ))
     db.commit()
+
+    # Link driver user to a driver record (for Driver/Dispatcher role login)
+    driver_user = db.query(User).filter(User.email == "driver@transitops.com").first()
+    if driver_user:
+        # Find or create a driver record linked to this user
+        linked_driver = db.query(Driver).filter(Driver.user_id == driver_user.id).first()
+        if not linked_driver:
+            # 1. Try exact name match (works if seed_database.py already ran)
+            existing_driver = db.query(Driver).filter(Driver.name == driver_user.name).first()
+            if existing_driver:
+                existing_driver.user_id = driver_user.id
+            else:
+                # 2. Grab any unlinked driver record (first available)
+                unlinked = db.query(Driver).filter(Driver.user_id.is_(None)).first()
+                if unlinked:
+                    unlinked.user_id = driver_user.id
+                else:
+                    # 3. No drivers exist yet — create a minimal one
+                    new_driver = Driver(
+                        name=driver_user.name,
+                        license_number=f"DL-{driver_user.id[:8].upper()}",
+                        license_category="CDL-A",
+                        license_expiry=datetime.date(2028, 12, 31),
+                        contact_number="0000000000",
+                        safety_score=100.0,
+                        user_id=driver_user.id,
+                    )
+                    db.add(new_driver)
+            db.commit()
 except Exception as e:
     print(f"Error seeding database: {e}")
 finally:

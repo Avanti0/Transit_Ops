@@ -20,18 +20,24 @@ interface NavItem {
   label: string;
   to: string;
   icon: React.ComponentType<{ className?: string }>;
+  roles?: string[]; // if undefined, shown to all roles
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+const ALL_NAV_ITEMS: NavItem[] = [
+  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, roles: ['Fleet Manager', 'Safety Officer', 'Financial Analyst'] },
   { label: 'Vehicles', to: '/vehicles', icon: Bus },
-  { label: 'Drivers', to: '/drivers', icon: Users },
+  { label: 'Drivers', to: '/drivers', icon: Users, roles: ['Fleet Manager', 'Safety Officer'] },
   { label: 'Trips', to: '/trips', icon: MapPin },
-  { label: 'Maintenance', to: '/maintenance', icon: Wrench },
+  { label: 'Maintenance', to: '/maintenance', icon: Wrench, roles: ['Fleet Manager', 'Safety Officer'] },
   { label: 'Fuel Logs', to: '/fuel', icon: Fuel },
   { label: 'Expenses', to: '/expenses', icon: Receipt },
-  { label: 'Reports', to: '/reports', icon: BarChart3 },
-  { label: 'Analytics', to: '/analytics', icon: TrendingUp },
+  { label: 'Reports', to: '/reports', icon: BarChart3, roles: ['Fleet Manager', 'Safety Officer', 'Financial Analyst'] },
+  { label: 'Analytics', to: '/analytics', icon: TrendingUp, roles: ['Fleet Manager', 'Safety Officer', 'Financial Analyst'] },
+];
+
+const DRIVER_NAV_ITEMS: NavItem[] = [
+  { label: 'My Vehicle', to: '/vehicles', icon: Bus },
+  { label: 'My Trips', to: '/my-trips', icon: MapPin },
 ];
 
 interface SidebarProps {
@@ -54,6 +60,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         .toUpperCase()
         .slice(0, 2)
     : 'TO';
+
+  const isDriver = user?.role === 'Driver/Dispatcher';
+  const navItems = isDriver
+    ? DRIVER_NAV_ITEMS
+    : ALL_NAV_ITEMS.filter((item) => !item.roles || item.roles.includes(user?.role ?? ''));
 
   const handleLogout = async () => {
     await authService.logout();
@@ -101,7 +112,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-          {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
+          {navItems.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

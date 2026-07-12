@@ -54,7 +54,10 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      navigate('/dashboard', { replace: true });
+      const raw = localStorage.getItem('transitops_user');
+      const user = raw ? (JSON.parse(raw) as { role?: string }) : null;
+      const dest = user?.role === 'Driver/Dispatcher' ? '/vehicles' : '/dashboard';
+      navigate(dest, { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
 
@@ -68,7 +71,10 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login({ email: email.trim(), password });
-      navigate('/dashboard', { replace: true });
+      const raw = localStorage.getItem('transitops_user');
+      const user = raw ? (JSON.parse(raw) as { role?: string }) : null;
+      const dest = user?.role === 'Driver/Dispatcher' ? '/vehicles' : '/dashboard';
+      navigate(dest, { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
       setLocalError(message);

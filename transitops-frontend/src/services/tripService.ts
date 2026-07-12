@@ -20,6 +20,15 @@ const mapTrip = (t: any): Trip => ({
 });
 
 export const tripService = {
+  async getMyTrips(): Promise<Trip[]> {
+    try {
+      const res = await api.get('/trips/my');
+      return res.data.map(mapTrip);
+    } catch {
+      return [];
+    }
+  },
+
   async getAll(): Promise<Trip[]> {
     const res = await api.get('/trips/');
     return res.data.map(mapTrip);
