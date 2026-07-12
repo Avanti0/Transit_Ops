@@ -1,7 +1,7 @@
 """
 Database seeding script for TransitOps.
 
-This script seeds the database in a single transaction with:
+This script seeds the database in a single transaction and is fully idempotent:
 1. Vehicles
 2. Drivers
 3. Maintenance
@@ -17,6 +17,7 @@ import sys
 import csv
 import datetime
 from pathlib import Path
+from typing import Tuple
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -93,32 +94,36 @@ def validate_vehicle(row: dict) -> bool:
     return True
 
 
-def seed_vehicles(db: Session) -> int:
+def seed_vehicles(db: Session) -> Tuple[int, int]:
     """
-    Seeds vehicles from vehicles.csv. Flushes changes and returns inserted count.
+    Seeds vehicles from vehicles.csv. Flushes changes and returns (inserted, skipped).
     """
     if not VEHICLES_CSV.exists():
-        return 0
+        return 0, 0
 
     inserted = 0
+    skipped = 0
     seen_registrations = set()
 
     with open(VEHICLES_CSV, "r", encoding="utf-8", errors="replace") as f:
         reader = csv.DictReader(f)
         if not reader.fieldnames:
-            return 0
+            return 0, 0
             
         for row in reader:
             if not validate_vehicle(row):
+                skipped += 1
                 continue
                 
             reg = row["registration_number"].strip()
             if reg in seen_registrations:
+                skipped += 1
                 continue
                 
             db_vehicle = db.query(Vehicle).filter(Vehicle.registration_number == reg).first()
             if db_vehicle:
                 seen_registrations.add(reg)
+                skipped += 1
                 continue
                 
             seen_registrations.add(reg)
@@ -142,7 +147,7 @@ def seed_vehicles(db: Session) -> int:
             inserted += 1
 
     db.flush()
-    return inserted
+    return inserted, skipped
 
 
 def validate_driver(row: dict) -> bool:
@@ -187,32 +192,36 @@ def validate_driver(row: dict) -> bool:
     return True
 
 
-def seed_drivers(db: Session) -> int:
+def seed_drivers(db: Session) -> Tuple[int, int]:
     """
-    Seeds drivers from drivers.csv. Flushes changes and returns inserted count.
+    Seeds drivers from drivers.csv. Flushes changes and returns (inserted, skipped).
     """
     if not DRIVERS_CSV.exists():
-        return 0
+        return 0, 0
 
     inserted = 0
+    skipped = 0
     seen_licenses = set()
 
     with open(DRIVERS_CSV, "r", encoding="utf-8", errors="replace") as f:
         reader = csv.DictReader(f)
         if not reader.fieldnames:
-            return 0
+            return 0, 0
             
         for row in reader:
             if not validate_driver(row):
+                skipped += 1
                 continue
                 
             lic = row["license_number"].strip()
             if lic in seen_licenses:
+                skipped += 1
                 continue
                 
             db_driver = db.query(Driver).filter(Driver.license_number == lic).first()
             if db_driver:
                 seen_licenses.add(lic)
+                skipped += 1
                 continue
                 
             seen_licenses.add(lic)
@@ -235,7 +244,7 @@ def seed_drivers(db: Session) -> int:
             inserted += 1
 
     db.flush()
-    return inserted
+    return inserted, skipped
 
 
 def validate_maintenance(row: dict) -> bool:
@@ -286,34 +295,49 @@ def validate_maintenance(row: dict) -> bool:
     return True
 
 
-def seed_maintenance(db: Session) -> int:
+def seed_maintenance(db: Session) -> Tuple[int, int]:
     """
-    Seeds maintenance logs from maintenance.csv. Flushes changes and returns inserted count.
+    Seeds maintenance logs from maintenance.csv. Flushes changes and returns (inserted, skipped).
     """
     if not MAINTENANCE_CSV.exists():
-        return 0
+        return 0, 0
 
     # Build a lookup map of registration_number -> vehicle_id
     vehicles = db.query(Vehicle).all()
     vehicle_map = {v.registration_number: v.id for v in vehicles}
 
     inserted = 0
+    skipped = 0
 
     with open(MAINTENANCE_CSV, "r", encoding="utf-8", errors="replace") as f:
         reader = csv.DictReader(f)
         if not reader.fieldnames:
-            return 0
+            return 0, 0
             
         for row in reader:
             if not validate_maintenance(row):
+                skipped += 1
                 continue
                 
             reg = row["vehicle_registration_number"].strip()
             v_id = vehicle_map.get(reg)
             if not v_id:
+                skipped += 1
                 continue
                 
             start_date = datetime.date.fromisoformat(row["start_date"].strip())
+            
+            # Check for existing duplicate maintenance log in database
+            db_maint = db.query(Maintenance).filter(
+                Maintenance.vehicle_id == v_id,
+                Maintenance.maintenance_type == row["maintenance_type"].strip(),
+                Maintenance.issue == row["issue"].strip(),
+                Maintenance.start_date == start_date
+            ).first()
+            if db_maint:
+                skipped += 1
+                continue
+                
             end_date = None
             end_date_str = row.get("end_date")
             if end_date_str and end_date_str.strip():
@@ -338,7 +362,7 @@ def seed_maintenance(db: Session) -> int:
             inserted += 1
 
     db.flush()
-    return inserted
+    return inserted, skipped
 
 
 def validate_fuel_log(row: dict) -> bool:
@@ -377,34 +401,48 @@ def validate_fuel_log(row: dict) -> bool:
     return True
 
 
-def seed_fuel_logs(db: Session) -> int:
+def seed_fuel_logs(db: Session) -> Tuple[int, int]:
     """
-    Seeds fuel logs from fuel_logs.csv. Flushes changes and returns inserted count.
+    Seeds fuel logs from fuel_logs.csv. Flushes changes and returns (inserted, skipped).
     """
     if not FUEL_LOGS_CSV.exists():
-        return 0
+        return 0, 0
 
     # Build a lookup map of registration_number -> vehicle_id
     vehicles = db.query(Vehicle).all()
     vehicle_map = {v.registration_number: v.id for v in vehicles}
 
     inserted = 0
+    skipped = 0
 
     with open(FUEL_LOGS_CSV, "r", encoding="utf-8", errors="replace") as f:
         reader = csv.DictReader(f)
         if not reader.fieldnames:
-            return 0
+            return 0, 0
             
         for row in reader:
             if not validate_fuel_log(row):
+                skipped += 1
                 continue
                 
             reg = row["vehicle_registration_number"].strip()
             v_id = vehicle_map.get(reg)
             if not v_id:
+                skipped += 1
                 continue
                 
             log_date = datetime.date.fromisoformat(row["date"].strip())
+            
+            # Check for existing duplicate fuel log in database
+            db_fuel = db.query(FuelLog).filter(
+                FuelLog.vehicle_id == v_id,
+                FuelLog.date == log_date,
+                FuelLog.liters == float(row["liters"]),
+                FuelLog.cost == float(row["cost"])
+            ).first()
+            if db_fuel:
+                skipped += 1
+                continue
                 
             fuel_log = FuelLog(
                 vehicle_id=v_id,
@@ -416,7 +454,7 @@ def seed_fuel_logs(db: Session) -> int:
             inserted += 1
 
     db.flush()
-    return inserted
+    return inserted, skipped
 
 
 def validate_expense(row: dict) -> bool:
@@ -456,34 +494,48 @@ def validate_expense(row: dict) -> bool:
     return True
 
 
-def seed_expenses(db: Session) -> int:
+def seed_expenses(db: Session) -> Tuple[int, int]:
     """
-    Seeds expenses from expenses.csv. Flushes changes and returns inserted count.
+    Seeds expenses from expenses.csv. Flushes changes and returns (inserted, skipped).
     """
     if not EXPENSES_CSV.exists():
-        return 0
+        return 0, 0
 
     # Build a lookup map of registration_number -> vehicle_id
     vehicles = db.query(Vehicle).all()
     vehicle_map = {v.registration_number: v.id for v in vehicles}
 
     inserted = 0
+    skipped = 0
 
     with open(EXPENSES_CSV, "r", encoding="utf-8", errors="replace") as f:
         reader = csv.DictReader(f)
         if not reader.fieldnames:
-            return 0
+            return 0, 0
             
         for row in reader:
             if not validate_expense(row):
+                skipped += 1
                 continue
                 
             reg = row["vehicle_registration_number"].strip()
             v_id = vehicle_map.get(reg)
             if not v_id:
+                skipped += 1
                 continue
                 
             exp_date = datetime.date.fromisoformat(row["date"].strip())
+            
+            # Check for existing duplicate expense in database
+            db_exp = db.query(Expense).filter(
+                Expense.vehicle_id == v_id,
+                Expense.date == exp_date,
+                Expense.expense_type == ExpenseType(row["expense_type"].strip()),
+                Expense.amount == float(row["amount"])
+            ).first()
+            if db_exp:
+                skipped += 1
+                continue
                 
             expense = Expense(
                 vehicle_id=v_id,
@@ -496,7 +548,7 @@ def seed_expenses(db: Session) -> int:
             inserted += 1
 
     db.flush()
-    return inserted
+    return inserted, skipped
 
 
 def main():
@@ -504,21 +556,21 @@ def main():
     db = get_db_session()
     try:
         # Run seeders sequentially in a single transaction
-        v_count = seed_vehicles(db)
-        d_count = seed_drivers(db)
-        m_count = seed_maintenance(db)
-        f_count = seed_fuel_logs(db)
-        e_count = seed_expenses(db)
+        v_ins, v_skip = seed_vehicles(db)
+        d_ins, d_skip = seed_drivers(db)
+        m_ins, m_skip = seed_maintenance(db)
+        f_ins, f_skip = seed_fuel_logs(db)
+        e_ins, e_skip = seed_expenses(db)
         
         # Commit only if all succeed
         db.commit()
         
-        # Print master summary
-        print(f"Vehicles: {v_count} inserted")
-        print(f"Drivers: {d_count} inserted")
-        print(f"Maintenance: {m_count} inserted")
-        print(f"Fuel Logs: {f_count} inserted")
-        print(f"Expenses: {e_count} inserted")
+        # Print master summary with skipped counts
+        print(f"Vehicles: {v_ins} inserted, {v_skip} skipped")
+        print(f"Drivers: {d_ins} inserted, {d_skip} skipped")
+        print(f"Maintenance: {m_ins} inserted, {m_skip} skipped")
+        print(f"Fuel Logs: {f_ins} inserted, {f_skip} skipped")
+        print(f"Expenses: {e_ins} inserted, {e_skip} skipped")
         
     except Exception as e:
         db.rollback()
