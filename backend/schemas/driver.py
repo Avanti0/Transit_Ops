@@ -154,3 +154,14 @@ class DriverResponse(DriverBase):
             }
         }
     )
+
+
+class DriverPaginatedResponse(BaseModel):
+    """
+    Pydantic schema for paginated Driver responses.
+    """
+    total: int = Field(..., description="Total count of matching driver records")
+    skip: int = Field(..., description="Number of items skipped")
+    limit: int = Field(..., description="Maximum number of items returned")
+    items: list[DriverResponse] = Field(..., description="List of driver records in the current page")
+
