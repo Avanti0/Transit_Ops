@@ -34,4 +34,4 @@ class Trip(Base):
     completed_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     vehicle: Mapped["Vehicle"] = relationship("Vehicle", back_populates="trips")
-    driver: Mapped["Driver"] = relationship("Driver", back_populates="trips")
+    driver: Mapped["Driver"] = relationship("Driver")
