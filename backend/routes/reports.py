@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from backend.database.session import get_db
 from backend.services.report import ReportService
 from backend.utils.auth import get_current_user
+from backend.utils.exceptions import BusinessRuleException
 import datetime
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
@@ -27,9 +28,8 @@ def export_csv(
     }
     clean_dataset = dataset.lower().strip()
     if clean_dataset not in valid_datasets:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid dataset '{dataset}'. Choose from 'vehicles', 'drivers', 'trips', 'maintenance', 'fuel', 'expenses'."
+        raise BusinessRuleException(
+            f"Invalid dataset '{dataset}'. Choose from 'vehicles', 'drivers', 'trips', 'maintenance', 'fuel', 'expenses'."
         )
         
     generator = service.generate_csv(clean_dataset)

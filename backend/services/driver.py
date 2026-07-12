@@ -2,10 +2,10 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Tuple
 import uuid
 import datetime
-from fastapi import HTTPException, status
 from backend.repositories.driver import DriverRepository
 from backend.models.driver import Driver, DriverStatus
 from backend.schemas.driver import DriverCreate, DriverUpdate
+from backend.utils.exceptions import EntityNotFoundException, BusinessRuleException
 
 class DriverService:
     """
@@ -23,16 +23,14 @@ class DriverService:
         # Business Rule 1: License number must be unique.
         existing_driver = self.repo.get_by_license_number(schema.license_number)
         if existing_driver:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Driver with license number '{schema.license_number}' already exists."
+            raise BusinessRuleException(
+                f"Driver with license number '{schema.license_number}' already exists."
             )
             
         # Business Rule 2: Driver license cannot already be expired while creating.
         if schema.license_expiry < datetime.date.today():
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Driver license cannot be expired at registration time."
+            raise BusinessRuleException(
+                "Driver license cannot be expired at registration time."
             )
             
         driver = Driver(**schema.model_dump())
@@ -44,10 +42,7 @@ class DriverService:
         """
         driver = self.repo.get_by_id(driver_id)
         if not driver:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Driver not found."
-            )
+            raise EntityNotFoundException("Driver not found.")
         return driver
         
     def list_drivers(
@@ -82,9 +77,8 @@ class DriverService:
         if "license_number" in update_data and update_data["license_number"] != driver.license_number:
             existing = self.repo.get_by_license_number(update_data["license_number"])
             if existing:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Driver with license number '{update_data['license_number']}' already exists."
+                raise BusinessRuleException(
+                    f"Driver with license number '{update_data['license_number']}' already exists."
                 )
                 
         for key, value in update_data.items():

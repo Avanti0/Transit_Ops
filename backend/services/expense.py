@@ -2,11 +2,11 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Tuple
 import uuid
 import datetime
-from fastapi import HTTPException, status
 from backend.repositories.expense import ExpenseRepository
 from backend.models.expense import Expense, ExpenseType
 from backend.models.vehicle import Vehicle
 from backend.schemas.expense import ExpenseCreate
+from backend.utils.exceptions import EntityNotFoundException, BusinessRuleException
 
 class ExpenseService:
     """
@@ -24,10 +24,7 @@ class ExpenseService:
         # Validate vehicle exists
         vehicle = self.db.query(Vehicle).filter(Vehicle.id == schema.vehicle_id).first()
         if not vehicle:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Vehicle with id '{schema.vehicle_id}' not found."
-            )
+            raise EntityNotFoundException(f"Vehicle with id '{schema.vehicle_id}' not found.")
             
         record = Expense(
             vehicle_id=schema.vehicle_id,
@@ -44,10 +41,7 @@ class ExpenseService:
         """
         record = self.repo.get_by_id(log_id)
         if not record:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Expense record not found."
-            )
+            raise EntityNotFoundException("Expense record not found.")
         return record
         
     def list_expenses(
@@ -64,10 +58,7 @@ class ExpenseService:
         """
         # Validate date range if both are provided
         if start_date and end_date and end_date < start_date:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="end_date cannot be earlier than start_date."
-            )
+            raise BusinessRuleException("end_date cannot be earlier than start_date.")
         return self.repo.list_expenses(
             skip=skip,
             limit=limit,

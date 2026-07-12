@@ -2,11 +2,11 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Tuple
 import uuid
 import datetime
-from fastapi import HTTPException, status
 from backend.repositories.maintenance import MaintenanceRepository
 from backend.models.maintenance import Maintenance, MaintenanceStatus
 from backend.models.vehicle import Vehicle, VehicleStatus
 from backend.schemas.maintenance import MaintenanceCreate, MaintenanceClose
+from backend.utils.exceptions import EntityNotFoundException, BusinessRuleException, TransitOpsException
 
 class MaintenanceService:
     """
@@ -26,17 +26,11 @@ class MaintenanceService:
             # Retrieve the vehicle
             vehicle = self.db.query(Vehicle).filter(Vehicle.id == schema.vehicle_id).first()
             if not vehicle:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Vehicle with id '{schema.vehicle_id}' not found."
-                )
+                raise EntityNotFoundException(f"Vehicle with id '{schema.vehicle_id}' not found.")
                 
             # Check if vehicle is retired
             if vehicle.status == VehicleStatus.RETIRED:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Cannot schedule maintenance for a Retired vehicle."
-                )
+                raise BusinessRuleException("Cannot schedule maintenance for a Retired vehicle.")
                 
             # Create the maintenance record
             record = Maintenance(
@@ -63,12 +57,9 @@ class MaintenanceService:
             
         except Exception as e:
             self.db.rollback()
-            if isinstance(e, HTTPException):
+            if isinstance(e, TransitOpsException):
                 raise e
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to create maintenance: {str(e)}"
-            )
+            raise e
             
     def get_maintenance_by_id(self, log_id: uuid.UUID) -> Maintenance:
         """
@@ -76,10 +67,7 @@ class MaintenanceService:
         """
         record = self.repo.get_by_id(log_id)
         if not record:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Maintenance record not found."
-            )
+            raise EntityNotFoundException("Maintenance record not found.")
         return record
         
     def list_maintenance(
@@ -111,16 +99,10 @@ class MaintenanceService:
         try:
             record = self.repo.get_by_id(log_id)
             if not record:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Maintenance record not found."
-                )
+                raise EntityNotFoundException("Maintenance record not found.")
                 
             if record.status == MaintenanceStatus.COMPLETED:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Maintenance record is already closed/completed."
-                )
+                raise BusinessRuleException("Maintenance record is already closed/completed.")
                 
             # Update maintenance details
             record.status = MaintenanceStatus.COMPLETED
@@ -133,10 +115,7 @@ class MaintenanceService:
                 
             # Validate end_date is not prior to start_date
             if record.end_date < record.start_date:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="end_date cannot be earlier than start_date."
-                )
+                raise BusinessRuleException("end_date cannot be earlier than start_date.")
                 
             # Update associated vehicle's status
             vehicle = record.vehicle
@@ -150,9 +129,6 @@ class MaintenanceService:
             
         except Exception as e:
             self.db.rollback()
-            if isinstance(e, HTTPException):
+            if isinstance(e, TransitOpsException):
                 raise e
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to close maintenance: {str(e)}"
-            )
+            raise e

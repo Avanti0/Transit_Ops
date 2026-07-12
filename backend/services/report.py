@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from typing import Generator
+from backend.utils.exceptions import BusinessRuleException
 import io
 import csv
 from backend.models.vehicle import Vehicle
@@ -79,9 +79,8 @@ class ReportService:
             rows_gen = get_rows()
             
         else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid dataset '{dataset}'. Choose from 'vehicles', 'drivers', 'trips', 'maintenance', 'fuel', 'expenses'."
+            raise BusinessRuleException(
+                f"Invalid dataset '{dataset}'. Choose from 'vehicles', 'drivers', 'trips', 'maintenance', 'fuel', 'expenses'."
             )
             
         # Yield CSV data row by row
