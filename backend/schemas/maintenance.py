@@ -144,3 +144,34 @@ class MaintenanceResponse(MaintenanceBase):
             }
         }
     )
+
+
+class MaintenanceClose(BaseModel):
+    """
+    Pydantic schema for closing an active maintenance log.
+    """
+    end_date: datetime.date = Field(
+        default_factory=datetime.date.today, 
+        description="Date when the maintenance work was completed"
+    )
+    cost: Optional[float] = Field(
+        None, 
+        ge=0.0, 
+        description="Final cost of the maintenance. If provided, overrides existing cost."
+    )
+    description: Optional[str] = Field(
+        None, 
+        max_length=1000, 
+        description="Updated or additional description upon completion"
+    )
+
+
+class MaintenancePaginatedResponse(BaseModel):
+    """
+    Pydantic schema for paginated Maintenance responses.
+    """
+    total: int = Field(..., description="Total count of matching maintenance records")
+    skip: int = Field(..., description="Number of items skipped")
+    limit: int = Field(..., description="Maximum number of items returned")
+    items: list[MaintenanceResponse] = Field(..., description="List of maintenance records in the current page")
+
