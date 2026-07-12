@@ -1,0 +1,79 @@
+You are a senior frontend engineer.
+Goal:
+Build ONLY the frontend for "TransitOps – Smart Transport Operations Platform" based on the provided README.md.
+Tech Stack:
+- React + Vite
+- TypeScript
+- Tailwind CSS
+- ShadCN UI
+- React Router
+- Recharts
+Constraints:
+- Hackathon-level → fast, clean, demo-ready UI
+- No backend required → use mock data + fake API services
+- Do NOT over-engineer (no Redux)
+--------------------------------------
+Requirements:
+1. Setup:
+- Create Vite React TypeScript project
+- Clean folder structure:
+  components/, pages/, layouts/, services/, hooks/, routes/, types/
+2. Layout:
+- Sidebar (modules navigation)
+- Topbar (user + logout)
+- Responsive design
+3. Routing:
+- /login
+- /dashboard
+- /vehicles
+- /drivers
+- /trips
+- /maintenance
+- /fuel
+- /expenses
+- /reports
+- /analytics
+- Protected routes (basic RBAC mock)
+4. Pages:
+- Dashboard:
+  KPI cards + charts (Recharts)
+- Vehicles:
+  Table + Add/Edit/Delete modal + status badges
+- Drivers:
+  Table + license expiry highlight + status
+- Trips:
+  Create trip form
+  Assign vehicle & driver
+  Status flow (Draft → Dispatched → Completed)
+- Maintenance:
+  Logs + status tracking
+- Fuel & Expenses:
+  Forms + list views
+- Reports:
+  Table + export button (mock)
+- Analytics:
+  Charts (utilization, cost, fuel efficiency)
+5. Business Rules (UI level):
+- Disable unavailable vehicles/drivers
+- Validate cargo vs capacity
+- Show license expiry warnings
+6. UX:
+- Loading states
+- Toasts
+- Error handling
+- Empty states
+7. Data:
+- Use mock JSON
+- Create service layer to simulate APIs
+--------------------------------------
+Deliver:
+- Full working frontend
+- All pages + components
+- Setup instructions:
+  npm install
+  npm run dev
+Ensure:
+- Clean UI
+- Responsive
+- Runs without errors
+- Demo-ready for judges
