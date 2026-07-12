@@ -28,6 +28,11 @@ Thumbs.db
 # Misc
 *.pdf
 *.docx
+
+# SQLite databases (local dev only — never commit)
+*.db
+*.sqlite
+*.sqlite3
 screenshots/
 
 # IDE
