@@ -153,6 +153,84 @@ npm run dev
 
 ---
 
+## Database Seeding
+
+TransitOps includes a flexible and idempotent command-line database seeding system to populate the database with realistic demo data from CSV templates.
+
+### CSV Files Placement
+
+Seed files should be placed in the `backend/data/` directory. The seeder expects the following file names:
+- `vehicles.csv`: Registry of fleet vehicles.
+- `drivers.csv`: List of fleet drivers.
+- `maintenance.csv`: Logs of vehicle maintenance activities.
+- `fuel_logs.csv`: Fuel transaction history.
+- `expenses.csv`: General operational expenses.
+
+### How to Run the Seeder
+
+Ensure you have activated the backend virtual environment:
+```bash
+# From the project root directory
+backend\venv\Scripts\activate
+```
+
+You can execute the seeding script from the project root:
+```bash
+python backend/scripts/seed_database.py [options]
+```
+Or from the `backend/` directory:
+```bash
+cd backend
+python scripts/seed_database.py [options]
+```
+
+#### Command-Line Options
+
+By default, the script seeds all tables. You can also seed specific tables using command-line flags:
+- `--vehicles`: Seed vehicles only.
+- `--drivers`: Seed drivers only.
+- `--maintenance`: Seed maintenance logs only.
+- `--fuel`: Seed fuel logs only.
+- `--expenses`: Seed expenses only.
+- `--all`: Seed all tables (default).
+- `-h`, `--help`: Show the command help message.
+
+Example of seeding only vehicles and drivers:
+```bash
+python backend/scripts/seed_database.py --vehicles --drivers
+```
+
+### Expected Output
+
+When running successfully, the script displays the seeding progress per module and prints a final execution summary:
+```text
+[INFO] Seeding Vehicles...
+[INFO] Seeding Drivers...
+
+==================================================
+TransitOps Seeding Execution Summary
+==================================================
+Vehicles: 50 inserted, 0 skipped
+Drivers: 50 inserted, 0 skipped
+--------------------------------------------------
+Seeding completed successfully in 0.25 seconds.
+==================================================
+```
+
+### Troubleshooting
+
+1. **`ModuleNotFoundError: No module named 'jose'`**
+   - Ensure the virtual environment is activated before running the script (`backend\venv\Scripts\activate`).
+2. **Database Constraint / Duplicate Errors**
+   - The seeding script is fully idempotent and automatically skips records that already exist (detected by vehicle registration number, driver license number, or matching dates/amounts/types for logs). However, if schema changes occur, you may want to delete the local `transitops.db` SQLite file and re-run the seeder to regenerate tables.
+3. **Invalid Path / Alternate Data Streams (`Zone.Identifier`)**
+   - If git fails with path errors on Windows, turn off NTFS protection locally:
+     ```bash
+     git config core.protectNTFS false
+     ```
+
+---
+
 ## Project Structure
 
 ```
