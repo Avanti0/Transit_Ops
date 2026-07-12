@@ -4,4 +4,4 @@ from backend.schemas.driver import DriverCreate, DriverUpdate, DriverResponse, D
 from backend.schemas.maintenance import MaintenanceCreate, MaintenanceUpdate, MaintenanceResponse, MaintenanceClose, MaintenancePaginatedResponse
 from backend.schemas.trip import TripCreate, TripComplete, TripResponse
 from backend.schemas.fuel_log import FuelLogCreate, FuelLogUpdate, FuelLogResponse, FuelLogPaginatedResponse
-from backend.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse
+from backend.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse, ExpensePaginatedResponse

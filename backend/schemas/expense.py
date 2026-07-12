@@ -89,3 +89,14 @@ class ExpenseResponse(ExpenseBase):
             }
         }
     )
+
+
+class ExpensePaginatedResponse(BaseModel):
+    """
+    Pydantic schema for paginated Expense responses.
+    """
+    total: int = Field(..., description="Total count of matching expense records")
+    skip: int = Field(..., description="Number of items skipped")
+    limit: int = Field(..., description="Maximum number of items returned")
+    items: list[ExpenseResponse] = Field(..., description="List of expense records in the current page")
+
