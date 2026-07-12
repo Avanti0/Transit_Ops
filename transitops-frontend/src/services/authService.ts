@@ -22,15 +22,18 @@ export const authService = {
     const tokenRes = await api.post('/auth/login', credentials);
     const { access_token } = tokenRes.data;
 
-    // 2. Store the token so the next request carries it
-    localStorage.setItem(TOKEN_KEY, access_token);
-
-    // 3. Fetch real user profile (id, name, role) from /auth/me
-    const meRes = await api.get('/auth/me');
+    // 2. Fetch real user profile by passing the token directly in the header.
+    //    Do NOT rely on the localStorage interceptor here — the token hasn't
+    //    been persisted yet when axios queues the request.
+    const meRes = await api.get('/auth/me', {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
     const user = mapUser(meRes.data);
 
-    // 4. Persist the resolved profile
+    // 3. Persist token and user profile only after both calls succeed
+    localStorage.setItem(TOKEN_KEY, access_token);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+
     return { user, token: access_token };
   },
 
