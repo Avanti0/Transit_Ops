@@ -1,65 +1,46 @@
-import { api } from './api';
+import api from './api';
 import type { FuelLog } from '../types';
 
-function mapBackendToFrontend(bf: any): FuelLog {
-  return {
-    id: bf.id,
-    vehicleId: bf.vehicle_id,
-    driverId: 'default-driver',
-    date: bf.date,
-    fuelStation: 'City Fuel Stop',
-    liters: bf.liters,
-    pricePerLiter: Number((bf.cost / bf.liters).toFixed(2)),
-    totalCost: bf.cost,
-    odometer: 0,
-    createdAt: bf.created_at || new Date().toISOString(),
-  };
-}
-
-function mapFrontendToBackend(f: any) {
-  return {
-    vehicle_id: f.vehicleId,
-    liters: Number(f.liters || 0),
-    cost: Number(f.totalCost || 0),
-    date: f.date || new Date().toISOString().split('T')[0],
-  };
-}
+const mapFuelLog = (f: any): FuelLog => ({
+  id: f.id,
+  vehicleId: f.vehicle_id,
+  driverId: '',
+  date: f.date,
+  fuelStation: '',
+  liters: f.liters,
+  pricePerLiter: f.liters > 0 ? f.cost / f.liters : 0,
+  totalCost: f.cost,
+  odometer: 0,
+  createdAt: f.created_at,
+});
 
 export const fuelService = {
   async getAll(): Promise<FuelLog[]> {
     const res = await api.get('/fuel/');
-    const items = Array.isArray(res.data) ? res.data : (res.data.items || []);
-    return items.map(mapBackendToFrontend);
+    return res.data.items.map(mapFuelLog);
   },
 
   async getById(id: string): Promise<FuelLog | null> {
     const res = await api.get(`/fuel/${id}`);
-    return mapBackendToFrontend(res.data);
+    return mapFuelLog(res.data);
   },
 
   async getByVehicle(vehicleId: string): Promise<FuelLog[]> {
-    const all = await this.getAll();
-    return all.filter((f) => f.vehicleId === vehicleId);
+    const res = await api.get('/fuel/', { params: { vehicle_id: vehicleId } });
+    return res.data.items.map(mapFuelLog);
   },
 
-  async getByDriver(driverId: string): Promise<FuelLog[]> {
-    const all = await this.getAll();
-    return all.filter((f) => f.driverId === driverId);
-  },
-
-  async create(data: Omit<FuelLog, 'id' | 'createdAt'>): Promise<FuelLog> {
-    const payload = mapFrontendToBackend(data);
-    const res = await api.post('/fuel/', payload);
-    return mapBackendToFrontend(res.data);
-  },
-
-  async update(id: string, data: Partial<Omit<FuelLog, 'id' | 'createdAt'>>): Promise<FuelLog> {
-    // Backend doesn't support a direct generic update, return existing details
-    const res = await api.get(`/fuel/${id}`);
-    return mapBackendToFrontend(res.data);
+  async create(data: { vehicleId: string; liters: number; cost: number; date: string }): Promise<FuelLog> {
+    const res = await api.post('/fuel/', {
+      vehicle_id: data.vehicleId,
+      liters: data.liters,
+      cost: data.cost,
+      date: data.date,
+    });
+    return mapFuelLog(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    // Delete is not supported explicitly by backend route, no-op
+    await api.delete(`/fuel/${id}`);
   },
 };

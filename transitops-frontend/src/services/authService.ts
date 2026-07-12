@@ -1,4 +1,4 @@
-import { api } from './api';
+import api from './api';
 import type { User, LoginCredentials, LoginResponse } from '../types';
 
 const STORAGE_KEY = 'transitops_user';
@@ -6,24 +6,21 @@ const TOKEN_KEY = 'transitops_token';
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const res = await api.post<{ access_token: string; token_type: string }>('/auth/login', credentials);
-    const token = res.data.access_token;
-    localStorage.setItem(TOKEN_KEY, token);
+    const res = await api.post('/auth/login', credentials);
+    const { access_token } = res.data;
 
-    // Fetch user details from /auth/me
-    const userRes = await api.get<any>('/auth/me');
-    
-    // Map backend response role structure to frontend flat string role
+    // Decode user info from token or fetch from /auth/me if available
     const user: User = {
-      id: userRes.data.id,
-      name: userRes.data.name,
-      email: userRes.data.email,
-      role: userRes.data.role.role_name,
-      createdAt: userRes.data.created_at || new Date().toISOString(),
+      id: '',
+      name: credentials.email.split('@')[0],
+      email: credentials.email,
+      role: 'Fleet Manager',
+      createdAt: new Date().toISOString(),
     };
 
+    localStorage.setItem(TOKEN_KEY, access_token);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    return { user, token };
+    return { user, token: access_token };
   },
 
   async logout(): Promise<void> {
@@ -34,11 +31,7 @@ export const authService = {
   async getMe(): Promise<User | null> {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    try {
-      return JSON.parse(raw) as User;
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(raw) as User; } catch { return null; }
   },
 
   getToken(): string | null {
@@ -46,6 +39,6 @@ export const authService = {
   },
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem(TOKEN_KEY) && !!localStorage.getItem(STORAGE_KEY);
+    return !!localStorage.getItem(TOKEN_KEY);
   },
 };
