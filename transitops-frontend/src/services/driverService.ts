@@ -1,58 +1,77 @@
+import { api } from './api';
 import type { Driver, DriverStatus } from '../types';
-import { mockDrivers } from '../data/mockData';
 
-let drivers: Driver[] = [...mockDrivers];
+function mapBackendToFrontend(bd: any): Driver {
+  return {
+    id: bd.id,
+    name: bd.name,
+    phone: bd.contact_number,
+    email: `${bd.name.toLowerCase().replace(/\s+/g, '')}@transitops.com`,
+    licenseNumber: bd.license_number,
+    licenseExpiry: bd.license_expiry,
+    status: bd.status,
+    rating: Number((bd.safety_score / 20).toFixed(1)), // 0-100 rating to 0-5
+    totalTrips: 0,
+    joiningDate: bd.created_at ? bd.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+    address: 'HQ Terminal',
+    emergencyContact: '+1-555-0199',
+    createdAt: bd.created_at || new Date().toISOString(),
+  };
+}
 
-const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+function mapFrontendToBackend(d: any) {
+  return {
+    name: d.name,
+    contact_number: d.phone,
+    license_number: d.licenseNumber,
+    license_expiry: d.licenseExpiry,
+    license_category: d.licenseCategory || 'CDL-A',
+    safety_score: d.rating ? d.rating * 20 : 100.0,
+    status: d.status,
+  };
+}
 
 export const driverService = {
   async getAll(): Promise<Driver[]> {
-    await delay();
-    return [...drivers];
+    const res = await api.get('/drivers/');
+    const items = Array.isArray(res.data) ? res.data : (res.data.items || []);
+    return items.map(mapBackendToFrontend);
   },
 
   async getById(id: string): Promise<Driver | null> {
-    await delay();
-    return drivers.find((d) => d.id === id) ?? null;
+    const res = await api.get(`/drivers/${id}`);
+    return mapBackendToFrontend(res.data);
   },
 
   async create(data: Omit<Driver, 'id' | 'createdAt'>): Promise<Driver> {
-    await delay();
-    const newDriver: Driver = {
-      ...data,
-      id: `d${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    drivers.push(newDriver);
-    return { ...newDriver };
+    const payload = mapFrontendToBackend(data);
+    const res = await api.post('/drivers/', payload);
+    return mapBackendToFrontend(res.data);
   },
 
   async update(id: string, data: Partial<Omit<Driver, 'id' | 'createdAt'>>): Promise<Driver> {
-    await delay();
-    const index = drivers.findIndex((d) => d.id === id);
-    if (index === -1) throw new Error(`Driver ${id} not found`);
-    drivers[index] = { ...drivers[index], ...data };
-    return { ...drivers[index] };
+    const existing = await api.get(`/drivers/${id}`);
+    const updatedPayload = {
+      ...mapFrontendToBackend({ ...mapBackendToFrontend(existing.data), ...data }),
+    };
+    const res = await api.put(`/drivers/${id}`, updatedPayload);
+    return mapBackendToFrontend(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    await delay();
-    const index = drivers.findIndex((d) => d.id === id);
-    if (index === -1) throw new Error(`Driver ${id} not found`);
-    drivers.splice(index, 1);
+    await api.delete(`/drivers/${id}`);
   },
 
   async updateStatus(id: string, status: DriverStatus): Promise<Driver> {
-    return driverService.update(id, { status });
+    return this.update(id, { status });
   },
 
-  // Internal helper used by other services (no delay)
+  // Internal compatibility helpers
   _updateStatusSync(id: string, status: DriverStatus): void {
-    const d = drivers.find((d) => d.id === id);
-    if (d) d.status = status;
+    // No-op for compatibility as real backend handles state transitions
   },
 
   _getAll(): Driver[] {
-    return drivers;
+    return [];
   },
 };

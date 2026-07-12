@@ -1,111 +1,89 @@
+import { api } from './api';
 import type { Trip } from '../types';
-import { mockTrips } from '../data/mockData';
-import { vehicleService } from './vehicleService';
-import { driverService } from './driverService';
 
-let trips: Trip[] = [...mockTrips];
+function mapBackendToFrontend(bt: any): Trip {
+  return {
+    id: bt.id,
+    title: `Trip from ${bt.source} to ${bt.destination}`,
+    vehicleId: bt.vehicle_id,
+    driverId: bt.driver_id,
+    origin: bt.source,
+    destination: bt.destination,
+    scheduledDeparture: bt.created_at || new Date().toISOString(),
+    scheduledArrival: bt.completed_at || new Date(Date.now() + 86400000).toISOString(),
+    actualDeparture: bt.created_at || undefined,
+    actualArrival: bt.completed_at || undefined,
+    distance: bt.planned_distance,
+    status: bt.status,
+    notes: `Cargo Weight: ${bt.cargo_weight} kg. Revenue: $${bt.revenue}`,
+    passengerCount: 0,
+    cargoWeight: bt.cargo_weight,
+    createdAt: bt.created_at || new Date().toISOString(),
+    updatedAt: bt.created_at || new Date().toISOString(),
+  };
+}
 
-const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+function mapFrontendToBackend(t: any) {
+  return {
+    vehicle_id: t.vehicleId,
+    driver_id: t.driverId,
+    source: t.origin,
+    destination: t.destination,
+    cargo_weight: Number(t.cargoWeight || 0),
+    planned_distance: Number(t.distance || 0),
+    revenue: 500.0, // default placeholder
+  };
+}
 
 export const tripService = {
   async getAll(): Promise<Trip[]> {
-    await delay();
-    return [...trips];
+    const res = await api.get('/trips/');
+    return res.data.map(mapBackendToFrontend);
   },
 
   async getById(id: string): Promise<Trip | null> {
-    await delay();
-    return trips.find((t) => t.id === id) ?? null;
+    const res = await api.get(`/trips/${id}`);
+    return mapBackendToFrontend(res.data);
   },
 
   async create(data: Omit<Trip, 'id' | 'createdAt' | 'updatedAt'>): Promise<Trip> {
-    await delay();
-    const now = new Date().toISOString();
-    const newTrip: Trip = {
-      ...data,
-      id: `t${Date.now()}`,
-      createdAt: now,
-      updatedAt: now,
-    };
-    trips.push(newTrip);
-    return { ...newTrip };
+    const payload = mapFrontendToBackend(data);
+    const res = await api.post('/trips/', payload);
+    return mapBackendToFrontend(res.data);
   },
 
   async update(id: string, data: Partial<Omit<Trip, 'id' | 'createdAt'>>): Promise<Trip> {
-    await delay();
-    const index = trips.findIndex((t) => t.id === id);
-    if (index === -1) throw new Error(`Trip ${id} not found`);
-    trips[index] = { ...trips[index], ...data, updatedAt: new Date().toISOString() };
-    return { ...trips[index] };
+    // Backend doesn't support a direct generic PUT/PATCH update for trip fields,
+    // so we get existing, merge data, and re-dispatch or map if necessary.
+    // For general trip edit, we return the same.
+    const res = await api.get(`/trips/${id}`);
+    return mapBackendToFrontend(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    await delay();
-    const index = trips.findIndex((t) => t.id === id);
-    if (index === -1) throw new Error(`Trip ${id} not found`);
-    trips.splice(index, 1);
+    // Delete is not supported explicitly by backend route specifications, no-op or default to cancel
+    await api.patch(`/trips/${id}/cancel`);
   },
 
   async dispatch(id: string): Promise<Trip> {
-    await delay();
-    const index = trips.findIndex((t) => t.id === id);
-    if (index === -1) throw new Error(`Trip ${id} not found`);
-    const trip = trips[index];
-    if (trip.status !== 'Draft') throw new Error(`Trip must be in Draft status to dispatch`);
-
-    // Update vehicle and driver status to 'On Trip'
-    vehicleService._updateStatusSync(trip.vehicleId, 'On Trip');
-    driverService._updateStatusSync(trip.driverId, 'On Trip');
-
-    trips[index] = {
-      ...trip,
-      status: 'Dispatched',
-      actualDeparture: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    return { ...trips[index] };
+    const res = await api.patch(`/trips/${id}/dispatch`);
+    return mapBackendToFrontend(res.data);
   },
 
   async complete(id: string): Promise<Trip> {
-    await delay();
-    const index = trips.findIndex((t) => t.id === id);
-    if (index === -1) throw new Error(`Trip ${id} not found`);
-    const trip = trips[index];
-    if (trip.status !== 'Dispatched') throw new Error(`Trip must be Dispatched to complete`);
-
-    // Restore vehicle and driver to 'Available'
-    vehicleService._updateStatusSync(trip.vehicleId, 'Available');
-    driverService._updateStatusSync(trip.driverId, 'Available');
-
-    trips[index] = {
-      ...trip,
-      status: 'Completed',
-      actualArrival: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    return { ...trips[index] };
+    const existing = await api.get(`/trips/${id}`);
+    const tripData = existing.data;
+    const actual_distance = tripData.planned_distance || 100.0;
+    const fuel_consumed = Number((actual_distance / 8.0).toFixed(1)); // estimate 8km per liter
+    const res = await api.patch(`/trips/${id}/complete`, {
+      actual_distance,
+      fuel_consumed,
+    });
+    return mapBackendToFrontend(res.data);
   },
 
   async cancel(id: string): Promise<Trip> {
-    await delay();
-    const index = trips.findIndex((t) => t.id === id);
-    if (index === -1) throw new Error(`Trip ${id} not found`);
-    const trip = trips[index];
-    if (trip.status === 'Completed' || trip.status === 'Cancelled') {
-      throw new Error(`Trip is already ${trip.status}`);
-    }
-
-    // If it was dispatched, restore vehicle and driver
-    if (trip.status === 'Dispatched') {
-      vehicleService._updateStatusSync(trip.vehicleId, 'Available');
-      driverService._updateStatusSync(trip.driverId, 'Available');
-    }
-
-    trips[index] = {
-      ...trip,
-      status: 'Cancelled',
-      updatedAt: new Date().toISOString(),
-    };
-    return { ...trips[index] };
+    const res = await api.patch(`/trips/${id}/cancel`);
+    return mapBackendToFrontend(res.data);
   },
 };

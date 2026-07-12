@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from backend.database.session import get_db
 from backend.models.user import User, Role
 from backend.schemas.user import LoginRequest, Token, UserCreate, UserResponse
-from backend.utils.auth import hash_password, verify_password, create_access_token
+from backend.utils.auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -34,3 +34,9 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     token = create_access_token({"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
+

@@ -14,6 +14,7 @@ import { tripService } from '../services/tripService';
 import { fuelService } from '../services/fuelService';
 import { expenseService } from '../services/expenseService';
 import { maintenanceService } from '../services/maintenanceService';
+import { api } from '../services/api';
 import type { Vehicle, Trip, FuelLog, Expense, MaintenanceLog } from '../types';
 
 // ─── Report row types ─────────────────────────────────────────────────────────
@@ -183,36 +184,28 @@ export default function ReportsPage() {
 
   // ─── CSV Export ────────────────────────────────────────────────────────────
 
-  const handleExport = () => {
-    let csv = '';
-    let filename = '';
+  const handleExport = async () => {
+    let dataset = 'vehicles';
+    if (reportType === 'fleet-utilization') dataset = 'vehicles';
+    else if (reportType === 'fuel-efficiency') dataset = 'fuel';
+    else if (reportType === 'operational-cost') dataset = 'expenses';
+    else if (reportType === 'vehicle-roi') dataset = 'trips';
 
-    if (reportType === 'fleet-utilization') {
-      csv = 'Vehicle,Make/Model,Status,Completed Trips,Total Distance (km),Utilization %\n' +
-        fleetUtilizationData.map((r) => `${r.regNumber},${r.makeModel},${r.status},${r.completedTrips},${r.totalDistance},${r.utilizationRate}`).join('\n');
-      filename = 'fleet-utilization.csv';
-    } else if (reportType === 'fuel-efficiency') {
-      csv = 'Vehicle,Make/Model,Fuel Type,Total Liters,Total Fuel Cost (₹),Avg Efficiency (km/L)\n' +
-        fuelEfficiencyData.map((r) => `${r.regNumber},${r.makeModel},${r.fuelType},${r.totalLiters},${r.totalFuelCost},${r.avgEfficiency}`).join('\n');
-      filename = 'fuel-efficiency.csv';
-    } else if (reportType === 'operational-cost') {
-      csv = 'Vehicle,Make/Model,Fuel Cost (₹),Maintenance Cost (₹),Other Cost (₹),Total Cost (₹)\n' +
-        operationalCostData.map((r) => `${r.regNumber},${r.makeModel},${r.fuelCost},${r.maintenanceCost},${r.otherCost},${r.totalCost}`).join('\n');
-      filename = 'operational-cost.csv';
-    } else {
-      csv = 'Vehicle,Make/Model,Revenue (₹),Costs (₹),Acquisition Cost (₹),ROI %\n' +
-        vehicleROIData.map((r) => `${r.regNumber},${r.makeModel},${r.revenue},${r.costs},${r.acquisitionCost},${r.roi}`).join('\n');
-      filename = 'vehicle-roi.csv';
+    try {
+      const res = await api.get(`/reports/csv?dataset=${dataset}`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([res.data], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${dataset}-report.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Downloaded ${dataset} report from server`);
+    } catch {
+      toast.error('Failed to download report from server');
     }
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`Exported ${filename}`);
   };
 
   const currentReport = REPORT_OPTIONS.find((r) => r.value === reportType);
