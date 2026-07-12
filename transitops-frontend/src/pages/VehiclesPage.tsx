@@ -32,6 +32,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { vehicleService } from '../services/vehicleService';
 import type { Vehicle, VehicleStatus, VehicleType, FuelType } from '../types';
 import { cn } from '../lib/utils';
+import { AppLayout } from '../layouts/AppLayout';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -306,7 +307,8 @@ export default function VehiclesPage() {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 p-6">
+    <AppLayout>
+      <div className="space-y-6">
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -743,6 +745,7 @@ export default function VehiclesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

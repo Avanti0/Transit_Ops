@@ -33,6 +33,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { dashboardService } from '../services/dashboardService';
 import type { KPIData, ChartData } from '../types';
+import { AppLayout } from '../layouts/AppLayout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -261,16 +262,19 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-4">
-        <AlertTriangle className="h-12 w-12 text-red-400" />
-        <h2 className="text-lg font-semibold text-slate-800">Failed to load dashboard</h2>
-        <p className="text-slate-500 text-sm max-w-xs">{error}</p>
-      </div>
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-4">
+          <AlertTriangle className="h-12 w-12 text-red-400" />
+          <h2 className="text-lg font-semibold text-slate-800">Failed to load dashboard</h2>
+          <p className="text-slate-500 text-sm max-w-xs">{error}</p>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <AppLayout>
+      <div className="space-y-8">
       {/* Page heading */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
@@ -460,6 +464,7 @@ export default function DashboardPage() {
           </Card>
         </div>
       ) : null}
-    </div>
+      </div>
+    </AppLayout>
   );
 }

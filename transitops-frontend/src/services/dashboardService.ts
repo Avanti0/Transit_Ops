@@ -18,6 +18,7 @@ export const dashboardService = {
       totalDrivers: d.drivers_on_duty ?? 0,
       availableDrivers: 0,
       activeTrips: d.active_trips ?? 0,
+      pendingTrips: 0,
       completedTripsThisMonth: 0,
       totalExpensesThisMonth: d.total_operational_cost ?? 0,
       fuelCostThisMonth: d.total_fuel_cost ?? 0,
