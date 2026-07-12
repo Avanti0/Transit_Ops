@@ -1,23 +1,35 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+*.egg-info/
 
-# Environments
+# Environment
 .env
 .venv
 env/
-venv/
 ENV/
-env.bak/
-venv.bak/
 
-# OS generated files
+# Node
+node_modules/
+dist/
+.next/
+
+# OS
+.DS_Store
 Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
+*.Zone.Identifier
 
-# IDE files
+# Misc
+*.pdf
+*.docx
+screenshots/
+
+# IDE
 .vscode/
 .idea/
