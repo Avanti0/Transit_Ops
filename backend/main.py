@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.database.base import Base
 from backend.database.session import engine
 import backend.models  # register all models
-from backend.routes import auth, vehicles, drivers, trips, maintenance
+from backend.routes import auth, vehicles, drivers, trips, maintenance, dashboard
 
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +22,7 @@ app.include_router(vehicles.router)
 app.include_router(drivers.router)
 app.include_router(trips.router)
 app.include_router(maintenance.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/")
