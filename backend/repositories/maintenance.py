@@ -15,7 +15,7 @@ class MaintenanceRepository:
         """
         Retrieves a Maintenance record by UUID.
         """
-        return self.db.query(Maintenance).filter(Maintenance.id == log_id).first()
+        return self.db.query(Maintenance).filter(Maintenance.id == str(log_id)).first()
         
     def list_maintenance(
         self,
@@ -34,7 +34,7 @@ class MaintenanceRepository:
         
         # Filtering
         if vehicle_id:
-            query = query.filter(Maintenance.vehicle_id == vehicle_id)
+            query = query.filter(Maintenance.vehicle_id == str(vehicle_id))
         if status:
             query = query.filter(Maintenance.status == status)
             

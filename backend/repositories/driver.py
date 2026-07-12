@@ -15,7 +15,7 @@ class DriverRepository:
         """
         Retrieves a Driver by their UUID.
         """
-        return self.db.query(Driver).filter(Driver.id == driver_id).first()
+        return self.db.query(Driver).filter(Driver.id == str(driver_id)).first()
         
     def get_by_license_number(self, license_number: str) -> Optional[Driver]:
         """
