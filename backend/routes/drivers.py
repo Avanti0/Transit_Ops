@@ -6,7 +6,7 @@ from backend.database.session import get_db
 from backend.schemas.driver import DriverCreate, DriverUpdate, DriverResponse, DriverPaginatedResponse
 from backend.models.driver import DriverStatus
 from backend.services.driver import DriverService
-from backend.utils.auth import require_roles
+from backend.utils.auth import require_roles, get_current_user
 
 router = APIRouter(prefix="/drivers", tags=["Drivers"])
 
@@ -35,7 +35,7 @@ def get_drivers(
     sort_by: Optional[str] = Query(default=None, description="Field to sort by (e.g., name, license_expiry, safety_score)"),
     sort_order: str = Query(default="asc", pattern="^(asc|desc|ASC|DESC)$", description="Sort direction"),
     db: Session = Depends(get_db),
-    _=rbac_dependency
+    _=Depends(get_current_user)
 ):
     """
     Retrieves a list of drivers matching filters, supporting pagination and sorting.
@@ -60,7 +60,7 @@ def get_drivers(
 def get_driver(
     driver_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _=rbac_dependency
+    _=Depends(get_current_user)
 ):
     """
     Retrieves a single driver's details by UUID.
