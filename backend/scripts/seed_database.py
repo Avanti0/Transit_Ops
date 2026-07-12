@@ -1,7 +1,7 @@
 """
 Database seeding script for TransitOps.
 
-This script reads vehicles.csv and drivers.csv and seeds the database.
+This script reads vehicles.csv, drivers.csv, and maintenance.csv and seeds the database.
 
 Usage:
     python -m backend.scripts.seed_database
@@ -22,11 +22,13 @@ from backend.database.session import SessionLocal, engine
 from backend.database.base import Base
 from backend.models.vehicle import Vehicle, VehicleStatus
 from backend.models.driver import Driver, DriverStatus
+from backend.models.maintenance import Maintenance, MaintenanceStatus
 
 # CSV file paths
 DATA_DIR = Path(__file__).parent.parent / "data"
 VEHICLES_CSV = DATA_DIR / "vehicles.csv"
 DRIVERS_CSV = DATA_DIR / "drivers.csv"
+MAINTENANCE_CSV = DATA_DIR / "maintenance.csv"
 
 
 def get_db_session() -> Session:
@@ -265,6 +267,127 @@ def seed_drivers(db: Session):
     print(f"Skipped: {skipped}")
 
 
+def validate_maintenance(row: dict) -> bool:
+    """
+    Validates that a row from maintenance.csv contains all required fields and correct formats.
+    """
+    # Required text fields
+    if not row.get("vehicle_registration_number") or not row["vehicle_registration_number"].strip():
+        return False
+    if not row.get("maintenance_type") or not row["maintenance_type"].strip():
+        return False
+    if not row.get("issue") or not row["issue"].strip():
+        return False
+        
+    # Required cost field
+    try:
+        cost = float(row["cost"])
+        if cost < 0.0:
+            return False
+    except (ValueError, TypeError, KeyError):
+        return False
+        
+    # Required start_date field
+    start_date_str = row.get("start_date")
+    if not start_date_str or not start_date_str.strip():
+        return False
+    try:
+        datetime.date.fromisoformat(start_date_str.strip())
+    except ValueError:
+        return False
+        
+    # Optional end_date field
+    end_date_str = row.get("end_date")
+    if end_date_str and end_date_str.strip():
+        try:
+            datetime.date.fromisoformat(end_date_str.strip())
+        except ValueError:
+            return False
+            
+    # Optional status validation
+    status_str = row.get("status")
+    if status_str and status_str.strip():
+        try:
+            MaintenanceStatus(status_str.strip())
+        except ValueError:
+            return False
+            
+    return True
+
+
+def seed_maintenance(db: Session):
+    """
+    Seeds maintenance logs from maintenance.csv.
+    """
+    if not MAINTENANCE_CSV.exists():
+        print(f"[ERROR] maintenance.csv not found at {MAINTENANCE_CSV}")
+        return
+
+    # Build a lookup map of registration_number -> vehicle_id
+    vehicles = db.query(Vehicle).all()
+    vehicle_map = {v.registration_number: v.id for v in vehicles}
+
+    total_rows = 0
+    inserted = 0
+    skipped = 0
+
+    with open(MAINTENANCE_CSV, "r", encoding="utf-8", errors="replace") as f:
+        reader = csv.DictReader(f)
+        
+        if not reader.fieldnames:
+            print("Total rows: 0")
+            print("Inserted: 0")
+            print("Skipped: 0")
+            return
+            
+        for row in reader:
+            total_rows += 1
+            
+            # Validate row
+            if not validate_maintenance(row):
+                skipped += 1
+                continue
+                
+            reg = row["vehicle_registration_number"].strip()
+            v_id = vehicle_map.get(reg)
+            
+            # Skip if vehicle reference is invalid
+            if not v_id:
+                skipped += 1
+                continue
+                
+            # Parse dates
+            start_date = datetime.date.fromisoformat(row["start_date"].strip())
+            end_date = None
+            end_date_str = row.get("end_date")
+            if end_date_str and end_date_str.strip():
+                end_date = datetime.date.fromisoformat(end_date_str.strip())
+                
+            # Parse status
+            status_val = MaintenanceStatus.ACTIVE
+            status_str = row.get("status")
+            if status_str and status_str.strip():
+                status_val = MaintenanceStatus(status_str.strip())
+                
+            maintenance = Maintenance(
+                vehicle_id=v_id,
+                maintenance_type=row["maintenance_type"].strip(),
+                issue=row["issue"].strip(),
+                description=row["description"].strip() if row.get("description") and row["description"].strip() else None,
+                cost=float(row["cost"]),
+                status=status_val,
+                start_date=start_date,
+                end_date=end_date
+            )
+            db.add(maintenance)
+            inserted += 1
+
+    db.commit()
+    print(f"Total rows: {total_rows}")
+    print(f"Inserted: {inserted}")
+    print(f"Skipped: {skipped}")
+
+
 def main():
     create_tables()
     db = get_db_session()
@@ -273,6 +396,8 @@ def main():
         seed_vehicles(db)
         print("Seeding Drivers...")
         seed_drivers(db)
+        print("Seeding Maintenance Logs...")
+        seed_maintenance(db)
     except Exception as e:
         db.rollback()
         print(f"[ERROR] Error during seeding: {e}")
