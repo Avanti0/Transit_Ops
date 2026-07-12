@@ -32,10 +32,9 @@ class DashboardKPIs(BaseModel):
         ..., 
         description="Number of pending/draft trips"
     )
-    drivers_on_duty: int = Field(
-        ..., 
-        description="Number of drivers currently on a trip"
-    )
+    total_drivers: int = Field(default=0, description="Total registered drivers")
+    available_drivers: int = Field(default=0, description="Number of available drivers")
+    drivers_on_duty: int = Field(..., description="Number of drivers currently on a trip")
     fleet_utilization_percentage: float = Field(
         ..., 
         description="Percentage of the active fleet compared to total vehicles (excluding retired)"

@@ -6,7 +6,7 @@ const mapMaintenance = (m: any): MaintenanceLog => ({
   vehicleId: m.vehicle_id,
   type: m.maintenance_type as any,
   description: m.description ?? m.issue,
-  status: m.status as MaintenanceStatus,
+  status: (m.status === 'Active' ? 'Open' : m.status === 'Completed' ? 'Completed' : m.status) as MaintenanceStatus,
   reportedDate: m.start_date,
   completedDate: m.end_date ?? undefined,
   technicianName: '',
@@ -32,14 +32,14 @@ export const maintenanceService = {
     return res.data.items.map(mapMaintenance);
   },
 
-  async create(data: { vehicleId: string; maintenanceType: string; issue: string; description?: string; cost?: number; startDate: string }): Promise<MaintenanceLog> {
+  async create(data: any): Promise<MaintenanceLog> {
     const res = await api.post('/maintenance/', {
       vehicle_id: data.vehicleId,
-      maintenance_type: data.maintenanceType,
-      issue: data.issue,
+      maintenance_type: data.maintenanceType ?? data.type ?? 'Routine',
+      issue: data.issue ?? data.description ?? 'General maintenance',
       description: data.description,
       cost: data.cost ?? 0,
-      start_date: data.startDate,
+      start_date: data.startDate ?? data.reportedDate ?? new Date().toISOString().split('T')[0],
     });
     return mapMaintenance(res.data);
   },

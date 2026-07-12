@@ -28,26 +28,27 @@ export const driverService = {
     return mapDriver(res.data);
   },
 
-  async create(data: { name: string; licenseNumber: string; licenseCategory: string; licenseExpiry: string; contactNumber: string; safetyScore?: number }): Promise<Driver> {
+  async create(data: any): Promise<Driver> {
     const res = await api.post('/drivers/', {
       name: data.name,
       license_number: data.licenseNumber,
-      license_category: data.licenseCategory,
+      license_category: data.licenseCategory || 'B',
       license_expiry: data.licenseExpiry,
-      contact_number: data.contactNumber,
-      safety_score: data.safetyScore ?? 100.0,
+      contact_number: data.contactNumber || data.phone || '00000',
+      safety_score: data.safetyScore ?? data.rating ?? 100.0,
     });
     return mapDriver(res.data);
   },
 
-  async update(id: string, data: Partial<{ name: string; licenseNumber: string; licenseExpiry: string; contactNumber: string; status: DriverStatus; safetyScore: number }>): Promise<Driver> {
+  async update(id: string, data: any): Promise<Driver> {
     const payload: any = {};
     if (data.name) payload.name = data.name;
     if (data.licenseNumber) payload.license_number = data.licenseNumber;
     if (data.licenseExpiry) payload.license_expiry = data.licenseExpiry;
-    if (data.contactNumber) payload.contact_number = data.contactNumber;
+    if (data.contactNumber || data.phone) payload.contact_number = data.contactNumber || data.phone;
     if (data.status) payload.status = data.status;
     if (data.safetyScore !== undefined) payload.safety_score = data.safetyScore;
+    if (data.rating !== undefined) payload.safety_score = data.rating;
     const res = await api.put(`/drivers/${id}`, payload);
     return mapDriver(res.data);
   },

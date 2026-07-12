@@ -30,14 +30,14 @@ export const tripService = {
     return mapTrip(res.data);
   },
 
-  async create(data: { vehicleId: string; driverId: string; source: string; destination: string; cargoWeight: number; plannedDistance: number; revenue?: number }): Promise<Trip> {
+  async create(data: any): Promise<Trip> {
     const res = await api.post('/trips/', {
       vehicle_id: data.vehicleId,
       driver_id: data.driverId,
-      source: data.source,
+      source: data.source ?? data.origin,
       destination: data.destination,
-      cargo_weight: data.cargoWeight,
-      planned_distance: data.plannedDistance,
+      cargo_weight: data.cargoWeight ?? data.cargo_weight ?? 0,
+      planned_distance: data.plannedDistance ?? data.distance ?? 0,
       revenue: data.revenue ?? 0,
     });
     return mapTrip(res.data);

@@ -50,10 +50,15 @@ class DashboardService:
         active_trips = trip_map.get(TripStatus.DISPATCHED, 0)
         pending_trips = trip_map.get(TripStatus.DRAFT, 0)
         
-        # 3. Drivers on duty
-        drivers_on_duty = self.db.query(Driver).filter(
-            Driver.status == DriverStatus.ON_TRIP
-        ).count()
+        # 3. Driver counts
+        driver_status_counts = self.db.query(
+            Driver.status,
+            func.count(Driver.id)
+        ).group_by(Driver.status).all()
+        driver_map = {status: count for status, count in driver_status_counts}
+        total_drivers = sum(driver_map.values())
+        available_drivers = driver_map.get(DriverStatus.AVAILABLE, 0)
+        drivers_on_duty = driver_map.get(DriverStatus.ON_TRIP, 0)
         
         # 4. Cost Aggregations (using scalar query aggregates)
         total_fuel_cost = self.db.query(func.sum(FuelLog.cost)).scalar() or 0.0
@@ -81,6 +86,8 @@ class DashboardService:
             available_vehicles=available_vehicles,
             vehicles_in_maintenance=vehicles_in_maintenance,
             retired_vehicles=retired_vehicles,
+            total_drivers=total_drivers,
+            available_drivers=available_drivers,
             active_trips=active_trips,
             pending_trips=pending_trips,
             drivers_on_duty=drivers_on_duty,

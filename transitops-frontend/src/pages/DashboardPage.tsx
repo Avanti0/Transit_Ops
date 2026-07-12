@@ -284,10 +284,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {KPI_CARDS.map((card) => {
             const IconComp = card.icon;
-            const rawValue = kpis ? kpis[card.key] : 0;
+            const rawValue = (kpis ? kpis[card.key] : 0) ?? 0;
             const displayValue = card.format
-              ? card.format(rawValue)
-              : rawValue.toLocaleString();
+              ? card.format(rawValue as number)
+              : (rawValue as number).toLocaleString();
 
             return (
               <Card
