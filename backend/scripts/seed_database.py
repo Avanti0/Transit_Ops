@@ -1,7 +1,7 @@
 """
 Database seeding script for TransitOps.
 
-This script reads vehicles.csv, drivers.csv, maintenance.csv, and fuel_logs.csv and seeds the database.
+This script reads vehicles.csv, drivers.csv, maintenance.csv, fuel_logs.csv, and expenses.csv and seeds the database.
 
 Usage:
     python -m backend.scripts.seed_database
@@ -24,6 +24,7 @@ from backend.models.vehicle import Vehicle, VehicleStatus
 from backend.models.driver import Driver, DriverStatus
 from backend.models.maintenance import Maintenance, MaintenanceStatus
 from backend.models.fuel_log import FuelLog
+from backend.models.expense import Expense, ExpenseType
 
 # CSV file paths
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -31,6 +32,7 @@ VEHICLES_CSV = DATA_DIR / "vehicles.csv"
 DRIVERS_CSV = DATA_DIR / "drivers.csv"
 MAINTENANCE_CSV = DATA_DIR / "maintenance.csv"
 FUEL_LOGS_CSV = DATA_DIR / "fuel_logs.csv"
+EXPENSES_CSV = DATA_DIR / "expenses.csv"
 
 
 def get_db_session() -> Session:
@@ -306,6 +308,7 @@ def validate_maintenance(row: dict) -> bool:
         except ValueError:
             return False
             
+    # Optional status validation
     status_str = row.get("status")
     if status_str and status_str.strip():
         try:
@@ -484,6 +487,103 @@ def seed_fuel_logs(db: Session):
     print(f"Skipped: {skipped}")
 
 
+def validate_expense(row: dict) -> bool:
+    """
+    Validates that a row from expenses.csv contains all required fields and correct formats.
+    """
+    # Required text fields
+    if not row.get("vehicle_registration_number") or not row["vehicle_registration_number"].strip():
+        return False
+        
+    # Required expense_type validation
+    expense_type_str = row.get("expense_type")
+    if not expense_type_str or not expense_type_str.strip():
+        return False
+    try:
+        ExpenseType(expense_type_str.strip())
+    except ValueError:
+        return False
+        
+    # Required amount field
+    try:
+        amount = float(row["amount"])
+        if amount < 0.0:
+            return False
+    except (ValueError, TypeError, KeyError):
+        return False
+        
+    # Required date field
+    date_str = row.get("date")
+    if not date_str or not date_str.strip():
+        return False
+    try:
+        datetime.date.fromisoformat(date_str.strip())
+    except ValueError:
+        return False
+            
+    return True
+
+
+def seed_expenses(db: Session):
+    """
+    Seeds expenses from expenses.csv.
+    """
+    if not EXPENSES_CSV.exists():
+        print(f"[ERROR] expenses.csv not found at {EXPENSES_CSV}")
+        return
+
+    # Build a lookup map of registration_number -> vehicle_id
+    vehicles = db.query(Vehicle).all()
+    vehicle_map = {v.registration_number: v.id for v in vehicles}
+
+    total_rows = 0
+    inserted = 0
+    skipped = 0
+
+    with open(EXPENSES_CSV, "r", encoding="utf-8", errors="replace") as f:
+        reader = csv.DictReader(f)
+        
+        if not reader.fieldnames:
+            print("Total rows: 0")
+            print("Inserted: 0")
+            print("Skipped: 0")
+            return
+            
+        for row in reader:
+            total_rows += 1
+            
+            # Validate row
+            if not validate_expense(row):
+                skipped += 1
+                continue
+                
+            reg = row["vehicle_registration_number"].strip()
+            v_id = vehicle_map.get(reg)
+            
+            # Skip if vehicle reference is invalid
+            if not v_id:
+                skipped += 1
+                continue
+                
+            # Parse date
+            exp_date = datetime.date.fromisoformat(row["date"].strip())
+                
+            expense = Expense(
+                vehicle_id=v_id,
+                expense_type=ExpenseType(row["expense_type"].strip()),
+                amount=float(row["amount"]),
+                description=row["description"].strip() if row.get("description") and row["description"].strip() else None,
+                date=exp_date
+            )
+            db.add(expense)
+            inserted += 1
+
+    db.commit()
+    print(f"Total rows: {total_rows}")
+    print(f"Inserted: {inserted}")
+    print(f"Skipped: {skipped}")
+
+
 def main():
     create_tables()
     db = get_db_session()
@@ -496,6 +596,8 @@ def main():
         seed_maintenance(db)
         print("Seeding Fuel Logs...")
         seed_fuel_logs(db)
+        print("Seeding Expenses...")
+        seed_expenses(db)
     except Exception as e:
         db.rollback()
         print(f"[ERROR] Error during seeding: {e}")
