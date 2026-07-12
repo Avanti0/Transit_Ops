@@ -16,7 +16,7 @@ class FuelLogRepository:
         """
         Retrieves a Fuel Log by UUID.
         """
-        return self.db.query(FuelLog).filter(FuelLog.id == log_id).first()
+        return self.db.query(FuelLog).filter(FuelLog.id == str(log_id)).first()
         
     def list_fuel_logs(
         self,
@@ -34,7 +34,7 @@ class FuelLogRepository:
         
         # Filtering
         if vehicle_id:
-            query = query.filter(FuelLog.vehicle_id == vehicle_id)
+            query = query.filter(FuelLog.vehicle_id == str(vehicle_id))
         if start_date:
             query = query.filter(FuelLog.date >= start_date)
         if end_date:

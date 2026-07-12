@@ -8,7 +8,7 @@ from backend.schemas.trip import TripCreate, TripComplete
 
 
 def validate_and_create_trip(payload: TripCreate, db: Session) -> Trip:
-    vehicle = db.query(Vehicle).filter(Vehicle.id == payload.vehicle_id).first()
+    vehicle = db.query(Vehicle).filter(Vehicle.id == str(payload.vehicle_id)).first()
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
     if vehicle.status != VehicleStatus.AVAILABLE:
@@ -16,7 +16,7 @@ def validate_and_create_trip(payload: TripCreate, db: Session) -> Trip:
     if payload.cargo_weight > vehicle.max_load_capacity:
         raise HTTPException(status_code=400, detail=f"Cargo weight {payload.cargo_weight}kg exceeds vehicle capacity {vehicle.max_load_capacity}kg")
 
-    driver = db.query(Driver).filter(Driver.id == payload.driver_id).first()
+    driver = db.query(Driver).filter(Driver.id == str(payload.driver_id)).first()
     if not driver:
         raise HTTPException(status_code=404, detail="Driver not found")
     if driver.status == DriverStatus.SUSPENDED:
@@ -26,7 +26,10 @@ def validate_and_create_trip(payload: TripCreate, db: Session) -> Trip:
     if driver.license_expiry < datetime.now(timezone.utc).date():
         raise HTTPException(status_code=400, detail="Driver license is expired")
 
-    trip = Trip(**payload.model_dump())
+    dump = payload.model_dump()
+    dump["vehicle_id"] = str(dump["vehicle_id"])
+    dump["driver_id"] = str(dump["driver_id"])
+    trip = Trip(**dump)
     db.add(trip)
     db.commit()
     db.refresh(trip)
@@ -34,14 +37,14 @@ def validate_and_create_trip(payload: TripCreate, db: Session) -> Trip:
 
 
 def dispatch_trip(trip_id, db: Session) -> Trip:
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = db.query(Trip).filter(Trip.id == str(trip_id)).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     if trip.status != TripStatus.DRAFT:
         raise HTTPException(status_code=400, detail="Only Draft trips can be dispatched")
 
-    vehicle = db.query(Vehicle).filter(Vehicle.id == trip.vehicle_id).first()
-    driver = db.query(Driver).filter(Driver.id == trip.driver_id).first()
+    vehicle = db.query(Vehicle).filter(Vehicle.id == str(trip.vehicle_id)).first()
+    driver = db.query(Driver).filter(Driver.id == str(trip.driver_id)).first()
 
     if vehicle.status != VehicleStatus.AVAILABLE:
         raise HTTPException(status_code=400, detail=f"Vehicle is no longer available (status: {vehicle.status.value})")
@@ -59,14 +62,14 @@ def dispatch_trip(trip_id, db: Session) -> Trip:
 
 
 def complete_trip(trip_id, payload: TripComplete, db: Session) -> Trip:
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = db.query(Trip).filter(Trip.id == str(trip_id)).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     if trip.status != TripStatus.DISPATCHED:
         raise HTTPException(status_code=400, detail="Only Dispatched trips can be completed")
 
-    vehicle = db.query(Vehicle).filter(Vehicle.id == trip.vehicle_id).first()
-    driver = db.query(Driver).filter(Driver.id == trip.driver_id).first()
+    vehicle = db.query(Vehicle).filter(Vehicle.id == str(trip.vehicle_id)).first()
+    driver = db.query(Driver).filter(Driver.id == str(trip.driver_id)).first()
 
     trip.actual_distance = payload.actual_distance
     trip.fuel_consumed = payload.fuel_consumed
@@ -81,15 +84,15 @@ def complete_trip(trip_id, payload: TripComplete, db: Session) -> Trip:
 
 
 def cancel_trip(trip_id, db: Session) -> Trip:
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = db.query(Trip).filter(Trip.id == str(trip_id)).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     if trip.status not in (TripStatus.DRAFT, TripStatus.DISPATCHED):
         raise HTTPException(status_code=400, detail="Only Draft or Dispatched trips can be cancelled")
 
     if trip.status == TripStatus.DISPATCHED:
-        vehicle = db.query(Vehicle).filter(Vehicle.id == trip.vehicle_id).first()
-        driver = db.query(Driver).filter(Driver.id == trip.driver_id).first()
+        vehicle = db.query(Vehicle).filter(Vehicle.id == str(trip.vehicle_id)).first()
+        driver = db.query(Driver).filter(Driver.id == str(trip.driver_id)).first()
         vehicle.status = VehicleStatus.AVAILABLE
         driver.status = DriverStatus.AVAILABLE
 

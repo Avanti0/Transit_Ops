@@ -30,7 +30,7 @@ def get_vehicles(
 
 @router.get("/{vehicle_id}", response_model=VehicleResponse)
 def get_vehicle(vehicle_id: uuid.UUID, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    vehicle = db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
+    vehicle = db.query(Vehicle).filter(Vehicle.id == str(vehicle_id)).first()
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
     return vehicle
@@ -49,7 +49,7 @@ def create_vehicle(payload: VehicleCreate, db: Session = Depends(get_db), _=Depe
 
 @router.put("/{vehicle_id}", response_model=VehicleResponse)
 def update_vehicle(vehicle_id: uuid.UUID, payload: VehicleUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    vehicle = db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
+    vehicle = db.query(Vehicle).filter(Vehicle.id == str(vehicle_id)).first()
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
     for field, value in payload.model_dump(exclude_none=True).items():
@@ -61,7 +61,7 @@ def update_vehicle(vehicle_id: uuid.UUID, payload: VehicleUpdate, db: Session = 
 
 @router.delete("/{vehicle_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_vehicle(vehicle_id: uuid.UUID, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    vehicle = db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
+    vehicle = db.query(Vehicle).filter(Vehicle.id == str(vehicle_id)).first()
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
     db.delete(vehicle)

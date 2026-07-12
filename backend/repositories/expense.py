@@ -16,7 +16,7 @@ class ExpenseRepository:
         """
         Retrieves an Expense record by UUID.
         """
-        return self.db.query(Expense).filter(Expense.id == log_id).first()
+        return self.db.query(Expense).filter(Expense.id == str(log_id)).first()
         
     def list_expenses(
         self,
@@ -35,7 +35,7 @@ class ExpenseRepository:
         
         # Filtering
         if vehicle_id:
-            query = query.filter(Expense.vehicle_id == vehicle_id)
+            query = query.filter(Expense.vehicle_id == str(vehicle_id))
         if expense_type:
             query = query.filter(Expense.expense_type == expense_type)
         if start_date:

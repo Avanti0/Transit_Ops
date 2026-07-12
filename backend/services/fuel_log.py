@@ -22,12 +22,12 @@ class FuelLogService:
         Creates a new fuel log. Validates that the associated vehicle exists.
         """
         # Validate vehicle exists
-        vehicle = self.db.query(Vehicle).filter(Vehicle.id == schema.vehicle_id).first()
+        vehicle = self.db.query(Vehicle).filter(Vehicle.id == str(schema.vehicle_id)).first()
         if not vehicle:
             raise EntityNotFoundException(f"Vehicle with id '{schema.vehicle_id}' not found.")
             
         record = FuelLog(
-            vehicle_id=schema.vehicle_id,
+            vehicle_id=str(schema.vehicle_id),
             liters=schema.liters,
             cost=schema.cost,
             date=schema.date

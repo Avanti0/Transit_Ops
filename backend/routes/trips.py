@@ -26,7 +26,7 @@ def get_trips(
 @router.get("/{trip_id}", response_model=TripResponse)
 def get_trip(trip_id: uuid.UUID, db: Session = Depends(get_db), _=Depends(get_current_user)):
     from fastapi import HTTPException
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    trip = db.query(Trip).filter(Trip.id == str(trip_id)).first()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     return trip
