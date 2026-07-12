@@ -5,3 +5,4 @@ from backend.schemas.maintenance import MaintenanceCreate, MaintenanceUpdate, Ma
 from backend.schemas.trip import TripCreate, TripComplete, TripResponse
 from backend.schemas.fuel_log import FuelLogCreate, FuelLogUpdate, FuelLogResponse, FuelLogPaginatedResponse
 from backend.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse, ExpensePaginatedResponse
+from backend.schemas.dashboard import DashboardKPIs
