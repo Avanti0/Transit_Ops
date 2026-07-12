@@ -1,51 +1,51 @@
-registration_number,vehicle_name,vehicle_type,max_capacity,odometer,acquisition_cost,region,status,id
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2099,270983,1709920,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2637,282285,784230,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,996,271961,3603046,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4605,112154,4418110,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4274,421189,1581882,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,5
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1394,473331,4515959,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,6
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4217,389731,3267924,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,7
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1510,137104,3836739,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,8
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3591,423569,1459889,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,9
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3707,440616,3311571,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,10
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2282,117851,2095907,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,11
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1522,397117,2884906,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,12
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2724,479673,3083827,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,13
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1317,321217,3406492,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,14
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3698,242679,3333181,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,15
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,849,295753,543599,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,16
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2791,473244,2851380,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,17
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1470,150273,4565968,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,18
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4491,443104,2534321,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,19
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3838,351466,2442918,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,20
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1937,175708,1364603,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,21
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3794,456645,3467300,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,22
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4621,304498,2744288,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,23
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2153,94691,2087983,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,24
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2291,32530,898307,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,25
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2792,294594,3801099,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,26
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,965,273184,1989751,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,27
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1815,115385,3705533,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,28
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1712,368475,2038247,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,29
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2447,423624,570423,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,30
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,758,482755,1025973,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,31
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4133,383677,2419606,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,32
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3422,400276,4364199,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,33
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4533,59936,3340198,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,34
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4116,300054,2055134,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,35
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3389,460610,3941918,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,36
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4492,397019,3697578,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,37
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2882,108598,1233610,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,38
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1334,180388,2327880,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,39
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1999,465458,4047570,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,40
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3937,76503,1700690,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,41
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,2847,276296,2697779,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,42
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3508,228138,1998031,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,43
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,751,425739,2687518,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,44
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,725,132629,2624704,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,45
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3617,17648,2842949,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,46
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1972,94604,2888608,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,47
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1282,108386,4706687,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,48
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,3458,371996,1248744,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,49
-,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,1896,435875,3275380,error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,50
+registration_number,vehicle_name,vehicle_type,max_capacity,odometer,acquisition_cost,region,status
+TN13CD5506,Tata Van 01,Van,3736.6,222259.0,3545147.69,Central,In Shop
+TN14PQ1488,Volvo Truck 02,Truck,3670.3,154079.8,619411.86,Central,Available
+TN38PQ8359,Eicher Trailer 03,Trailer,4533.8,261443.6,3914633.15,East,Available
+TN29KL4527,Ashok Leyland Bus 04,Bus,1982.0,117078.6,2115407.21,North,Available
+TN78RS3045,Ashok Leyland Car 05,Car,1642.6,91487.6,3328879.1,Central,In Shop
+TN18GH1750,Eicher Van 06,Van,11709.5,295640.3,4348929.74,East,In Shop
+TN91RS6977,Volvo Van 07,Van,5867.6,66804.6,1701400.2,North,Retired
+TN78EF5010,Mahindra Van 08,Van,7202.8,84634.6,4664260.31,East,On Trip
+TN39AB1525,Volvo Bus 09,Bus,6316.9,24525.6,4609112.56,East,On Trip
+TN93GH9179,Volvo Car 10,Car,13327.9,194641.3,1142922.16,Central,Available
+TN84KL8019,Tata Trailer 11,Trailer,6291.3,69699.6,4988919.23,North,Available
+TN29CD3621,Ashok Leyland Car 12,Car,9147.9,118506.4,3181497.93,Central,Available
+TN97AB2876,Mahindra Trailer 13,Trailer,11387.7,231736.6,2030789.63,West,Available
+TN43AB9201,BharatBenz Van 14,Van,7861.4,36391.2,3313850.87,Central,In Shop
+TN29GH7126,Ashok Leyland Van 15,Van,8321.0,234694.8,2886591.52,West,Available
+TN24AB6947,Volvo Bus 16,Bus,3972.1,76057.1,3053106.25,West,Available
+TN78CD3060,BharatBenz Van 17,Van,10066.4,284320.4,1243071.32,West,Available
+TN79GH4295,Eicher Bus 18,Bus,6285.4,203147.7,2180392.26,North,In Shop
+TN38GH2049,Volvo Bus 19,Bus,805.0,168406.8,3147980.51,North,Available
+TN18GH1514,Mahindra Bus 20,Bus,1527.4,75211.4,3510400.0,Central,Available
+TN41RS8749,Eicher Car 21,Car,3260.9,33594.6,2439730.32,North,Available
+TN17CD7596,Mahindra Bus 22,Bus,12108.6,37234.4,1362155.32,West,Available
+TN45EF8579,Tata Van 23,Van,13180.0,27238.5,4136100.1,North,In Shop
+TN21AB4872,Mahindra Van 24,Van,6393.0,147000.7,4390926.77,West,Retired
+TN59AB5345,Volvo Car 25,Car,4636.1,210494.5,3787273.93,West,In Shop
+TN34EF5861,Tata Van 26,Van,14546.3,175858.2,2939878.41,North,On Trip
+TN74RS9701,Tata Van 27,Van,1324.8,154809.4,4331041.45,South,Available
+TN25PQ5033,BharatBenz Trailer 28,Trailer,9120.5,187717.5,2386512.12,East,On Trip
+TN36KL6147,Force Van 29,Van,4351.4,43609.1,3404753.55,North,Available
+TN68AB2638,Tata Truck 30,Truck,8295.7,154236.0,1096054.57,South,Available
+TN46MN3584,Volvo Car 31,Car,12589.3,212544.3,3252549.95,Central,Retired
+TN95AB5905,BharatBenz Truck 32,Truck,14114.5,44615.9,1019429.02,South,Available
+TN46KL4450,Force Bus 33,Bus,3452.2,192100.2,1687927.56,North,Available
+TN91CD7939,Mahindra Bus 34,Bus,1139.3,103399.2,1088688.47,West,Retired
+TN81PQ1158,Force Truck 35,Truck,1591.0,265516.4,4567678.57,East,Available
+TN65EF3088,Ashok Leyland Truck 36,Truck,4969.7,270199.5,4082550.37,South,In Shop
+TN95GH2684,Mahindra Bus 37,Bus,11811.7,265819.7,2328698.25,South,On Trip
+TN32EF7755,Volvo Truck 38,Truck,3100.7,277723.8,4020739.23,South,Available
+TN30KL2771,Eicher Car 39,Car,13146.4,258285.0,1500951.73,East,In Shop
+TN39KL4652,Force Truck 40,Truck,10070.5,122547.5,1753713.77,East,Available
+TN92MN9346,Ashok Leyland Car 41,Car,10353.0,253880.0,1990174.41,South,Available
+TN14KL2776,BharatBenz Trailer 42,Trailer,6801.2,219920.8,1911547.91,North,On Trip
+TN83PQ4114,Volvo Bus 43,Bus,1143.6,133637.0,2839641.57,South,In Shop
+TN65MN2146,BharatBenz Bus 44,Bus,9535.8,200699.3,1060813.92,East,Retired
+TN51PQ7592,Volvo Bus 45,Bus,8539.0,61592.8,3492182.45,South,Available
+TN61KL9977,Ashok Leyland Truck 46,Truck,4906.2,67003.9,4035914.72,West,On Trip
+TN66RS4501,Tata Trailer 47,Trailer,7361.2,270848.3,4082111.42,East,Available
+TN21MN4848,Eicher Bus 48,Bus,3757.3,63743.3,609914.24,Central,Available
+TN68CD7790,Volvo Trailer 49,Trailer,3319.3,210424.5,2724697.26,North,Available
+TN64CD4585,Force Van 50,Van,12159.6,210294.0,2590474.48,North,On Trip

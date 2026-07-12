@@ -1,51 +1,51 @@
 vehicle_registration_number,expense_type,amount,description,date
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,17589.49,error: undefined method `first' for nil:NilClass,2/21/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,32006.0,error: undefined method `first' for nil:NilClass,2/26/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,40972.08,error: undefined method `first' for nil:NilClass,8/27/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,9085.89,error: undefined method `first' for nil:NilClass,4/14/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,24750.43,error: undefined method `first' for nil:NilClass,10/6/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4503.83,error: undefined method `first' for nil:NilClass,9/13/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,48425.01,error: undefined method `first' for nil:NilClass,4/20/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,18327.01,error: undefined method `first' for nil:NilClass,4/29/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,36828.39,error: undefined method `first' for nil:NilClass,5/13/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,13251.29,error: undefined method `first' for nil:NilClass,4/21/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,30702.97,error: undefined method `first' for nil:NilClass,10/17/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,10903.8,error: undefined method `first' for nil:NilClass,11/15/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,13141.8,error: undefined method `first' for nil:NilClass,10/14/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,48652.64,error: undefined method `first' for nil:NilClass,9/17/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,30480.16,error: undefined method `first' for nil:NilClass,11/14/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,28250.96,error: undefined method `first' for nil:NilClass,12/19/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,44325.86,error: undefined method `first' for nil:NilClass,5/5/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,22574.77,error: undefined method `first' for nil:NilClass,4/9/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,30240.36,error: undefined method `first' for nil:NilClass,9/6/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,31365.08,error: undefined method `first' for nil:NilClass,2/19/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,31308.08,error: undefined method `first' for nil:NilClass,4/9/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,20340.32,error: undefined method `first' for nil:NilClass,11/23/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,4816.41,error: undefined method `first' for nil:NilClass,2/18/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,28114.9,error: undefined method `first' for nil:NilClass,1/1/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,27024.1,error: undefined method `first' for nil:NilClass,3/27/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,36113.44,error: undefined method `first' for nil:NilClass,6/20/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,48144.74,error: undefined method `first' for nil:NilClass,9/29/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,9148.87,error: undefined method `first' for nil:NilClass,10/7/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,9271.08,error: undefined method `first' for nil:NilClass,11/11/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,38705.62,error: undefined method `first' for nil:NilClass,7/20/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,28618.52,error: undefined method `first' for nil:NilClass,2/7/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,26368.12,error: undefined method `first' for nil:NilClass,10/14/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,34228.72,error: undefined method `first' for nil:NilClass,9/3/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,33005.57,error: undefined method `first' for nil:NilClass,2/5/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,31861.88,error: undefined method `first' for nil:NilClass,9/5/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,28735.58,error: undefined method `first' for nil:NilClass,12/17/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,23917.78,error: undefined method `first' for nil:NilClass,6/15/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,30809.46,error: undefined method `first' for nil:NilClass,10/22/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,34419.41,error: undefined method `first' for nil:NilClass,12/3/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,12426.92,error: undefined method `first' for nil:NilClass,9/1/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,40572.19,error: undefined method `first' for nil:NilClass,1/6/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,48643.4,error: undefined method `first' for nil:NilClass,1/15/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,8580.58,error: undefined method `first' for nil:NilClass,2/16/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,46193.11,error: undefined method `first' for nil:NilClass,5/20/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,24225.59,error: undefined method `first' for nil:NilClass,10/10/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,8736.48,error: undefined method `first' for nil:NilClass,8/22/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,45850.7,error: undefined method `first' for nil:NilClass,1/30/2026
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,18584.03,error: undefined method `first' for nil:NilClass,10/9/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,40650.17,error: undefined method `first' for nil:NilClass,10/7/2025
-error: undefined method `first' for nil:NilClass,error: undefined method `first' for nil:NilClass,33572.68,error: undefined method `first' for nil:NilClass,8/11/2025
+TN43AB9201,Repair,47293.54,Battery replacement,2026-02-21
+TN78CD3060,Repair,16742.06,Tyre replacement,2025-05-24
+TN21MN4848,Other,9196.89,Unloading charges,2025-06-29
+TN61KL9977,Maintenance,25262.99,Filter replacement,2024-03-14
+TN34EF5861,Toll,22092.87,Bridge toll,2024-03-20
+TN41RS8749,Other,28883.28,Unloading charges,2024-10-23
+TN78EF5010,Other,1532.4,Loading charges,2024-06-24
+TN39KL4652,Other,41685.28,Loading charges,2024-03-31
+TN25PQ5033,Toll,12544.17,Bridge toll,2025-06-20
+TN18GH1750,Other,43590.96,Loading charges,2024-08-14
+TN17CD7596,Maintenance,4280.78,Scheduled service,2025-06-27
+TN46KL4450,Maintenance,45343.18,Filter replacement,2024-12-25
+TN66RS4501,Maintenance,12195.31,Fluid top-up,2024-09-19
+TN97AB2876,Maintenance,30318.75,Scheduled service,2024-06-30
+TN64CD4585,Other,23465.68,Unloading charges,2025-11-28
+TN95GH2684,Repair,43280.22,Windshield repair,2024-06-03
+TN36KL6147,Toll,23711.59,City toll gate,2026-03-26
+TN79GH4295,Toll,17921.14,Highway toll — NH48,2024-11-13
+TN68AB2638,Other,2361.56,Loading charges,2026-05-01
+TN38GH2049,Toll,32410.99,Highway toll — NH48,2025-09-21
+TN30KL2771,Other,23404.23,Parking fee,2025-04-05
+TN95GH2684,Maintenance,16415.57,Lubrication,2025-05-28
+TN93GH9179,Toll,22800.89,City toll gate,2026-01-01
+TN18GH1750,Maintenance,2437.54,Lubrication,2025-03-25
+TN91CD7939,Maintenance,18512.95,Filter replacement,2025-01-31
+TN74RS9701,Repair,34105.44,Tyre replacement,2026-03-19
+TN92MN9346,Repair,3762.64,Tyre replacement,2025-07-25
+TN65MN2146,Other,14565.28,Driver allowance,2024-12-07
+TN18GH1750,Maintenance,45878.95,Filter replacement,2025-11-02
+TN51PQ7592,Other,6883.11,Parking fee,2024-11-13
+TN65EF3088,Other,32352.92,Loading charges,2026-04-12
+TN39AB1525,Toll,32478.23,Bridge toll,2025-06-04
+TN21AB4872,Toll,18448.58,State border toll,2024-08-07
+TN17CD7596,Other,10004.26,Driver allowance,2024-06-07
+TN78RS3045,Repair,42299.21,Tyre replacement,2025-06-03
+TN64CD4585,Toll,33265.5,State border toll,2025-09-03
+TN59AB5345,Maintenance,8531.24,Fluid top-up,2026-01-08
+TN36KL6147,Toll,20837.5,State border toll,2025-03-30
+TN39KL4652,Repair,37743.36,Dent repair,2024-08-27
+TN81PQ1158,Maintenance,15818.66,Lubrication,2026-05-05
+TN97AB2876,Repair,34076.19,Dent repair,2025-04-17
+TN64CD4585,Repair,39017.14,Dent repair,2024-06-14
+TN97AB2876,Maintenance,43713.6,Scheduled service,2025-10-18
+TN46MN3584,Repair,27949.77,Tyre replacement,2025-12-29
+TN91CD7939,Toll,14610.62,State border toll,2024-10-06
+TN36KL6147,Maintenance,41636.81,Scheduled service,2024-08-15
+TN36KL6147,Repair,46558.36,Dent repair,2024-02-24
+TN34EF5861,Repair,12171.01,Tyre replacement,2025-01-18
+TN29GH7126,Toll,16274.9,Highway toll — NH48,2026-05-09
+TN61KL9977,Repair,39673.34,Battery replacement,2024-02-09

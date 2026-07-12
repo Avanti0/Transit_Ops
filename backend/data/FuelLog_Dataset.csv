@@ -1,51 +1,51 @@
 vehicle_registration_number,liters,cost,date
-error: undefined method `first' for nil:NilClass,77.1,10935.22,6/24/2026
-error: undefined method `first' for nil:NilClass,137.4,17222.35,6/29/2026
-error: undefined method `first' for nil:NilClass,146.6,16701.91,11/2/2025
-error: undefined method `first' for nil:NilClass,128.2,7154.13,10/9/2025
-error: undefined method `first' for nil:NilClass,145.6,14488.03,11/18/2025
-error: undefined method `first' for nil:NilClass,195.8,14171.41,3/21/2026
-error: undefined method `first' for nil:NilClass,36.9,22257.96,2/13/2026
-error: undefined method `first' for nil:NilClass,223.4,14051.48,9/18/2025
-error: undefined method `first' for nil:NilClass,235.3,4773.56,4/27/2026
-error: undefined method `first' for nil:NilClass,276.4,10376.83,1/21/2026
-error: undefined method `first' for nil:NilClass,244.1,19551.53,5/5/2026
-error: undefined method `first' for nil:NilClass,227.9,17354.32,7/18/2025
-error: undefined method `first' for nil:NilClass,129.4,8277.03,9/16/2025
-error: undefined method `first' for nil:NilClass,163.5,22297.67,8/13/2025
-error: undefined method `first' for nil:NilClass,60.9,10368.33,9/24/2025
-error: undefined method `first' for nil:NilClass,45.1,21536.88,1/30/2026
-error: undefined method `first' for nil:NilClass,91.4,17837.28,7/28/2025
-error: undefined method `first' for nil:NilClass,247.5,12042.15,7/7/2026
-error: undefined method `first' for nil:NilClass,45.4,18915.75,3/1/2026
-error: undefined method `first' for nil:NilClass,73.8,16651.47,4/1/2026
-error: undefined method `first' for nil:NilClass,224.1,21954.77,7/19/2025
-error: undefined method `first' for nil:NilClass,67.8,13890.17,1/30/2026
-error: undefined method `first' for nil:NilClass,291.6,23919.67,4/25/2026
-error: undefined method `first' for nil:NilClass,259.5,23674.64,2/11/2026
-error: undefined method `first' for nil:NilClass,54.5,22975.25,6/21/2026
-error: undefined method `first' for nil:NilClass,91.7,23870.56,4/17/2026
-error: undefined method `first' for nil:NilClass,268.8,7361.84,4/20/2026
-error: undefined method `first' for nil:NilClass,29.2,12470.55,2/18/2026
-error: undefined method `first' for nil:NilClass,196.4,14514.94,10/12/2025
-error: undefined method `first' for nil:NilClass,200.0,21575.04,3/8/2026
-error: undefined method `first' for nil:NilClass,132.9,23608.47,8/16/2025
-error: undefined method `first' for nil:NilClass,198.2,22565.59,11/24/2025
-error: undefined method `first' for nil:NilClass,204.2,21802.92,4/21/2026
-error: undefined method `first' for nil:NilClass,269.5,13412.32,2/21/2026
-error: undefined method `first' for nil:NilClass,247.4,10877.42,1/15/2026
-error: undefined method `first' for nil:NilClass,112.9,15617.04,2/18/2026
-error: undefined method `first' for nil:NilClass,153.8,19663.04,8/31/2025
-error: undefined method `first' for nil:NilClass,134.6,13438.33,2/22/2026
-error: undefined method `first' for nil:NilClass,199.8,23277.48,4/18/2026
-error: undefined method `first' for nil:NilClass,276.3,2404.14,2/6/2026
-error: undefined method `first' for nil:NilClass,45.0,6978.97,8/19/2025
-error: undefined method `first' for nil:NilClass,103.6,8536.35,6/25/2026
-error: undefined method `first' for nil:NilClass,274.4,19820.38,1/9/2026
-error: undefined method `first' for nil:NilClass,46.0,20525.74,4/23/2026
-error: undefined method `first' for nil:NilClass,62.1,22307.7,10/19/2025
-error: undefined method `first' for nil:NilClass,297.1,14594.86,10/14/2025
-error: undefined method `first' for nil:NilClass,264.2,3615.43,10/15/2025
-error: undefined method `first' for nil:NilClass,68.3,22779.94,10/20/2025
-error: undefined method `first' for nil:NilClass,43.6,3946.86,1/12/2026
-error: undefined method `first' for nil:NilClass,153.1,20056.31,8/13/2025
+TN17CD7596,71.4,6248.82,2025-08-01
+TN43AB9201,41.7,4182.64,2024-07-31
+TN32EF7755,66.7,6829.67,2024-12-02
+TN64CD4585,55.1,5675.89,2024-01-03
+TN79GH4295,175.9,15460.51,2024-05-13
+TN81PQ1158,72.6,6424.37,2025-11-07
+TN14PQ1488,52.4,4829.44,2026-03-18
+TN24AB6947,130.1,11099.56,2024-09-28
+TN29KL4527,51.5,4811.09,2024-04-26
+TN21MN4848,40.8,3833.79,2025-01-05
+TN46KL4450,130.9,12309.85,2024-08-14
+TN39KL4652,37.4,3764.85,2026-06-06
+TN83PQ4114,118.6,11167.48,2024-02-01
+TN29KL4527,199.8,20368.8,2025-03-12
+TN65MN2146,48.4,4803.6,2025-03-30
+TN78RS3045,182.9,16724.79,2024-05-31
+TN78RS3045,51.5,5020.55,2025-08-22
+TN65EF3088,151.1,13994.59,2025-09-03
+TN91CD7939,80.1,7618.39,2025-03-16
+TN91RS6977,164.8,14385.11,2025-11-01
+TN14KL2776,179.2,17207.99,2026-06-05
+TN43AB9201,103.1,10594.74,2025-02-27
+TN17CD7596,170.7,15870.76,2026-01-17
+TN91RS6977,83.1,7582.91,2024-09-18
+TN21AB4872,192.1,18967.27,2025-04-30
+TN78RS3045,45.5,3945.18,2025-03-18
+TN91RS6977,156.6,14478.13,2024-05-13
+TN65EF3088,40.2,4186.13,2025-07-29
+TN17CD7596,143.9,13413.81,2026-06-13
+TN83PQ4114,190.0,17757.16,2026-01-08
+TN29KL4527,194.6,18877.8,2024-12-26
+TN91RS6977,128.2,11442.46,2025-11-03
+TN46MN3584,68.1,5935.89,2026-05-15
+TN65EF3088,92.5,9273.32,2025-08-10
+TN29GH7126,167.2,17038.2,2026-02-24
+TN39KL4652,134.3,13141.79,2024-01-27
+TN30KL2771,187.9,19088.61,2024-09-30
+TN14PQ1488,60.7,6012.58,2024-11-12
+TN17CD7596,89.7,7949.94,2024-05-26
+TN95GH2684,141.7,12241.71,2026-01-28
+TN92MN9346,195.2,16950.22,2025-06-27
+TN43AB9201,94.0,8842.85,2024-06-10
+TN21AB4872,83.0,7593.48,2025-08-04
+TN30KL2771,44.4,3820.72,2024-06-10
+TN68CD7790,135.0,13294.72,2024-10-05
+TN36KL6147,142.5,13496.64,2025-03-28
+TN74RS9701,76.4,7647.55,2024-04-26
+TN45EF8579,103.1,9347.55,2025-11-25
+TN32EF7755,112.7,11083.22,2024-02-16
+TN29GH7126,97.2,9427.09,2024-01-08
