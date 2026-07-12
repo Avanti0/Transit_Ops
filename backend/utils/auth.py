@@ -48,11 +48,23 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credentials_exception
 
+    # Validate that user_id is a recognisable UUID format (with or without hyphens),
+    # but query the DB using the *exact* string stored — do NOT normalise via uuid.UUID()
+    # because existing rows may be stored without hyphens.
     try:
-        user_uuid = uuid.UUID(user_id)  # validate format only
+        uuid.UUID(user_id.replace("-", ""))  # just validate it looks like a UUID
     except (ValueError, AttributeError):
         raise credentials_exception
-    user = db.query(User).filter(User.id == str(user_uuid)).first()
+
+    # Try the raw token value first, then the hyphenated form as fallback
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        # Try the hyphenated canonical form in case DB was seeded with hyphens
+        try:
+            hyphenated = str(uuid.UUID(user_id))
+            user = db.query(User).filter(User.id == hyphenated).first()
+        except (ValueError, AttributeError):
+            pass
     if user is None:
         raise credentials_exception
     return user
