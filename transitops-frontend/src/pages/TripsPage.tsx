@@ -25,7 +25,7 @@ const EMPTY_FORM = {
   destination: '',
   scheduledDeparture: '',
   scheduledArrival: '',
-  distance: 0,
+  plannedDistance: 0,
   status: 'Draft' as TripStatus,
   passengerCount: undefined as number | undefined,
   cargoWeight: undefined as number | undefined,
@@ -110,8 +110,12 @@ export default function TripsPage() {
     setSaving(true);
     try {
       await tripService.create({
-        ...formData,
-        distance: Number(formData.distance) || 0,
+        vehicleId: formData.vehicleId,
+        driverId: formData.driverId,
+        source: formData.origin,
+        destination: formData.destination,
+        cargoWeight: Number(formData.cargoWeight) || 0,
+        plannedDistance: Number(formData.plannedDistance) || 0,
       });
       toast.success('Trip created');
       setModalOpen(false);
@@ -139,7 +143,7 @@ export default function TripsPage() {
   const handleComplete = async (id: string) => {
     setActionLoading(id);
     try {
-      await tripService.complete(id);
+      await tripService.complete(id, 0, 0);
       toast.success('Trip completed');
       await loadAll();
     } catch (err) {
@@ -372,7 +376,7 @@ export default function TripsPage() {
             </div>
             <div className="space-y-1.5">
               <Label>Distance (km)</Label>
-              <Input type="number" min="0" value={formData.distance || ''} onChange={(e) => setFormData({ ...formData, distance: Number(e.target.value) })} placeholder="0" />
+              <Input type="number" min="0" value={formData.plannedDistance || ''} onChange={(e) => setFormData({ ...formData, plannedDistance: Number(e.target.value) })} placeholder="0" />
             </div>
             <div className="space-y-1.5">
               <Label>Cargo Weight (tons)</Label>

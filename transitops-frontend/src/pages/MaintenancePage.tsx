@@ -21,13 +21,12 @@ const STATUS_OPTIONS: MaintenanceStatus[] = ['Open', 'In Progress', 'Completed']
 
 const EMPTY_FORM = {
   vehicleId: '',
-  type: 'Preventive' as MaintenanceType,
+  maintenanceType: 'Preventive',
+  issue: '',
   description: '',
-  status: 'Open' as MaintenanceStatus,
-  reportedDate: new Date().toISOString().split('T')[0],
-  technicianName: '',
+  startDate: new Date().toISOString().split('T')[0],
   cost: 0,
-  mileageAtService: 0,
+  technicianName: '',
   notes: '',
 };
 
@@ -73,13 +72,20 @@ export default function MaintenancePage() {
   });
 
   const handleSave = async () => {
-    if (!formData.vehicleId || !formData.description || !formData.technicianName) {
-      toast.error('Vehicle, description, and technician are required');
+    if (!formData.vehicleId || !formData.description) {
+      toast.error('Vehicle and description are required');
       return;
     }
     setSaving(true);
     try {
-      await maintenanceService.create({ ...formData, cost: Number(formData.cost) || 0, mileageAtService: Number(formData.mileageAtService) || 0 });
+      await maintenanceService.create({
+        vehicleId: formData.vehicleId,
+        maintenanceType: formData.maintenanceType,
+        issue: formData.issue || formData.description || 'Maintenance',
+        description: formData.description + (formData.technicianName ? ` — Technician: ${formData.technicianName}` : '') + (formData.notes ? ` | Notes: ${formData.notes}` : ''),
+        cost: Number(formData.cost) || 0,
+        startDate: formData.startDate || new Date().toISOString().split('T')[0],
+      });
       toast.success('Maintenance log created');
       setModalOpen(false);
       await loadAll();
@@ -279,7 +285,7 @@ export default function MaintenancePage() {
             </div>
             <div className="space-y-1.5">
               <Label>Type</Label>
-              <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v as MaintenanceType })}>
+              <Select value={formData.maintenanceType} onValueChange={(v) => setFormData({ ...formData, maintenanceType: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {TYPE_OPTIONS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -287,33 +293,24 @@ export default function MaintenancePage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Status</Label>
-              <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as MaintenanceStatus })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label>Start Date</Label>
+              <Input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Issue Summary *</Label>
+              <Input value={formData.issue} onChange={(e) => setFormData({ ...formData, issue: e.target.value })} placeholder="Brief summary of the issue" />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Description *</Label>
               <Input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Describe the issue or service" />
             </div>
             <div className="space-y-1.5">
-              <Label>Technician *</Label>
+              <Label>Technician</Label>
               <Input value={formData.technicianName} onChange={(e) => setFormData({ ...formData, technicianName: e.target.value })} placeholder="Technician name" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Reported Date</Label>
-              <Input type="date" value={formData.reportedDate} onChange={(e) => setFormData({ ...formData, reportedDate: e.target.value })} />
             </div>
             <div className="space-y-1.5">
               <Label>Estimated Cost (₹)</Label>
               <Input type="number" min="0" value={formData.cost || ''} onChange={(e) => setFormData({ ...formData, cost: Number(e.target.value) })} placeholder="0" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Mileage at Service (km)</Label>
-              <Input type="number" min="0" value={formData.mileageAtService || ''} onChange={(e) => setFormData({ ...formData, mileageAtService: Number(e.target.value) })} placeholder="0" />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Notes</Label>

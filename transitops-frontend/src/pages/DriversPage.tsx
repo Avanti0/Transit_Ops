@@ -65,10 +65,11 @@ const EMPTY_FORM = {
   phone: '',
   email: '',
   licenseNumber: '',
+  licenseCategory: 'CDL-A',
   licenseExpiry: '',
+  contactNumber: '',
   status: 'Available' as DriverStatus,
-  rating: 4.0,
-  totalTrips: 0,
+  safetyScore: 100.0,
   joiningDate: new Date().toISOString().split('T')[0],
   address: '',
   emergencyContact: '',
@@ -135,10 +136,11 @@ export default function DriversPage() {
       phone: driver.phone,
       email: driver.email,
       licenseNumber: driver.licenseNumber,
+      licenseCategory: 'CDL-A',
       licenseExpiry: driver.licenseExpiry,
+      contactNumber: driver.phone,
       status: driver.status,
-      rating: driver.rating,
-      totalTrips: driver.totalTrips,
+      safetyScore: driver.rating ?? 100.0,
       joiningDate: driver.joiningDate,
       address: driver.address,
       emergencyContact: driver.emergencyContact,
@@ -154,10 +156,23 @@ export default function DriversPage() {
     setSaving(true);
     try {
       if (editingDriver) {
-        await driverService.update(editingDriver.id, formData);
+        await driverService.update(editingDriver.id, {
+          name: formData.name,
+          licenseNumber: formData.licenseNumber,
+          licenseExpiry: formData.licenseExpiry,
+          contactNumber: formData.contactNumber || formData.phone,
+          safetyScore: formData.safetyScore,
+        });
         toast.success('Driver updated');
       } else {
-        await driverService.create(formData);
+        await driverService.create({
+          name: formData.name,
+          licenseNumber: formData.licenseNumber,
+          licenseCategory: formData.licenseCategory,
+          licenseExpiry: formData.licenseExpiry,
+          contactNumber: formData.contactNumber || formData.phone,
+          safetyScore: formData.safetyScore,
+        });
         toast.success('Driver added');
       }
       setModalOpen(false);

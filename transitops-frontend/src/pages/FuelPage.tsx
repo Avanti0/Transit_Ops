@@ -88,11 +88,10 @@ export default function FuelPage() {
     setSaving(true);
     try {
       await fuelService.create({
-        ...formData,
+        vehicleId: formData.vehicleId,
         liters: Number(formData.liters),
-        pricePerLiter: Number(formData.pricePerLiter),
-        totalCost: Number(formData.totalCost),
-        odometer: Number(formData.odometer),
+        cost: Number(formData.totalCost) || Number(formData.liters) * Number(formData.pricePerLiter),
+        date: formData.date,
       });
       toast.success('Fuel log added');
       setModalOpen(false);

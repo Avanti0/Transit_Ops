@@ -14,7 +14,7 @@ import { tripService } from '../services/tripService';
 import { fuelService } from '../services/fuelService';
 import { expenseService } from '../services/expenseService';
 import { maintenanceService } from '../services/maintenanceService';
-import { api } from '../services/api';
+import api from '../services/api';
 import type { Vehicle, Trip, FuelLog, Expense, MaintenanceLog } from '../types';
 
 // ─── Report row types ─────────────────────────────────────────────────────────

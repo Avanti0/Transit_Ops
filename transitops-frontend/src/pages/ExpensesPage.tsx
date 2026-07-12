@@ -27,7 +27,7 @@ const TYPE_STYLE: Record<ExpenseType, string> = {
 };
 
 const EMPTY_FORM = {
-  type: 'Miscellaneous' as ExpenseType,
+  expenseType: 'Other' as string,
   vehicleId: '',
   driverId: '',
   amount: 0,
@@ -97,11 +97,11 @@ export default function ExpensesPage() {
     setSaving(true);
     try {
       await expenseService.create({
-        ...formData,
+        vehicleId: formData.vehicleId ?? '',
+        expenseType: formData.expenseType,
         amount: Number(formData.amount),
-        vehicleId: formData.vehicleId || undefined,
-        driverId: formData.driverId || undefined,
-        approvedBy: formData.approvedBy || undefined,
+        description: formData.description,
+        date: formData.date,
       });
       toast.success('Expense recorded');
       setModalOpen(false);
@@ -235,10 +235,10 @@ export default function ExpensesPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 py-2">
             <div className="space-y-1.5">
               <Label>Type</Label>
-              <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v as ExpenseType })}>
+              <Select value={formData.expenseType} onValueChange={(v) => setFormData({ ...formData, expenseType: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {EXPENSE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {['Toll', 'Maintenance', 'Repair', 'Other'].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
