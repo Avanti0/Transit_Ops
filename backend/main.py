@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.database.base import Base
 from backend.database.session import engine
+from backend.utils.config import settings
 import backend.models  # register all models
 from backend.routes import auth, vehicles, drivers, trips, maintenance, fuel_log, dashboard, expense, analytics, reports
 from backend.middleware.logging import RequestLoggingMiddleware
@@ -65,7 +66,7 @@ app.add_middleware(RequestLoggingMiddleware)
 # Register CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.ALLOWED_ORIGINS.split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
