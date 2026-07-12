@@ -1,54 +1,46 @@
+import api from './api';
 import type { FuelLog } from '../types';
-import { mockFuelLogs } from '../data/mockData';
 
-let fuelLogs: FuelLog[] = [...mockFuelLogs];
-
-const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const mapFuelLog = (f: any): FuelLog => ({
+  id: f.id,
+  vehicleId: f.vehicle_id,
+  driverId: '',
+  date: f.date,
+  fuelStation: '',
+  liters: f.liters,
+  pricePerLiter: f.liters > 0 ? f.cost / f.liters : 0,
+  totalCost: f.cost,
+  odometer: 0,
+  createdAt: f.created_at,
+});
 
 export const fuelService = {
   async getAll(): Promise<FuelLog[]> {
-    await delay();
-    return [...fuelLogs];
+    const res = await api.get('/fuel/');
+    return res.data.items.map(mapFuelLog);
   },
 
   async getById(id: string): Promise<FuelLog | null> {
-    await delay();
-    return fuelLogs.find((f) => f.id === id) ?? null;
+    const res = await api.get(`/fuel/${id}`);
+    return mapFuelLog(res.data);
   },
 
   async getByVehicle(vehicleId: string): Promise<FuelLog[]> {
-    await delay();
-    return fuelLogs.filter((f) => f.vehicleId === vehicleId);
+    const res = await api.get('/fuel/', { params: { vehicle_id: vehicleId } });
+    return res.data.items.map(mapFuelLog);
   },
 
-  async getByDriver(driverId: string): Promise<FuelLog[]> {
-    await delay();
-    return fuelLogs.filter((f) => f.driverId === driverId);
-  },
-
-  async create(data: Omit<FuelLog, 'id' | 'createdAt'>): Promise<FuelLog> {
-    await delay();
-    const newLog: FuelLog = {
-      ...data,
-      id: `f${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    fuelLogs.push(newLog);
-    return { ...newLog };
-  },
-
-  async update(id: string, data: Partial<Omit<FuelLog, 'id' | 'createdAt'>>): Promise<FuelLog> {
-    await delay();
-    const index = fuelLogs.findIndex((f) => f.id === id);
-    if (index === -1) throw new Error(`Fuel log ${id} not found`);
-    fuelLogs[index] = { ...fuelLogs[index], ...data };
-    return { ...fuelLogs[index] };
+  async create(data: { vehicleId: string; liters: number; cost: number; date: string }): Promise<FuelLog> {
+    const res = await api.post('/fuel/', {
+      vehicle_id: data.vehicleId,
+      liters: data.liters,
+      cost: data.cost,
+      date: data.date,
+    });
+    return mapFuelLog(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    await delay();
-    const index = fuelLogs.findIndex((f) => f.id === id);
-    if (index === -1) throw new Error(`Fuel log ${id} not found`);
-    fuelLogs.splice(index, 1);
+    await api.delete(`/fuel/${id}`);
   },
 };

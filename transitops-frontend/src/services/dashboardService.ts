@@ -1,6 +1,5 @@
+import api from './api';
 import type { KPIData, ChartData, ChartDataPoint, CostBreakdownItem } from '../types';
-import { vehicleService } from './vehicleService';
-import { driverService } from './driverService';
 import { tripService } from './tripService';
 import { expenseService } from './expenseService';
 import { fuelService } from './fuelService';
@@ -11,58 +10,22 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 export const dashboardService = {
   async getKPIs(): Promise<KPIData> {
-    await delay();
-
-    const vehicles = vehicleService._getAll();
-    const drivers = driverService._getAll();
-    const trips = await tripService.getAll();
-    const expenses = await expenseService.getAll();
-    const fuelLogs = await fuelService.getAll();
-
-    const now = new Date();
-    const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
-    const completedThisMonth = trips.filter(
-      (t) => t.status === 'Completed' && t.updatedAt.startsWith(monthStr),
-    ).length;
-
-    const expensesThisMonth = expenses
-      .filter((e) => e.date.startsWith(monthStr))
-      .reduce((sum, e) => sum + e.amount, 0);
-
-    const fuelCostThisMonth = expenses
-      .filter((e) => e.type === 'Fuel' && e.date.startsWith(monthStr))
-      .reduce((sum, e) => sum + e.amount, 0);
-
-    const efficiencies = fuelLogs
-      .filter((f) => f.efficiency != null && f.efficiency > 0)
-      .map((f) => f.efficiency as number);
-    const avgFuelEfficiency =
-      efficiencies.length > 0
-        ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length
-        : 0;
-
-    const availableVehicles = vehicles.filter((v) => v.status === 'Available').length;
-    const vehiclesOnTrip = vehicles.filter((v) => v.status === 'On Trip').length;
-    const vehiclesInShop = vehicles.filter((v) => v.status === 'In Shop').length;
-    const activeVehicles = vehicles.filter((v) => v.status !== 'Retired').length;
-    const fleetUtilizationRate =
-      activeVehicles > 0 ? Math.round((vehiclesOnTrip / activeVehicles) * 100) : 0;
-
+    const res = await api.get('/dashboard/');
+    const d = res.data;
     return {
-      totalVehicles: vehicles.length,
-      availableVehicles,
-      vehiclesOnTrip,
-      vehiclesInShop,
-      totalDrivers: drivers.length,
-      availableDrivers: drivers.filter((d) => d.status === 'Available').length,
-      activeTrips: trips.filter((t) => t.status === 'Dispatched').length,
-      completedTripsThisMonth: completedThisMonth,
-      totalExpensesThisMonth: expensesThisMonth,
-      fuelCostThisMonth,
-      avgFuelEfficiency: parseFloat(avgFuelEfficiency.toFixed(2)),
-      maintenanceOpenCount: 0, // resolved lazily via maintenanceService if needed
-      fleetUtilizationRate,
+      totalVehicles: d.totalVehicles,
+      availableVehicles: d.availableVehicles,
+      vehiclesOnTrip: d.activeVehicles,
+      vehiclesInShop: d.vehiclesInMaintenance,
+      totalDrivers: 0,
+      availableDrivers: 0,
+      activeTrips: d.activeTrips,
+      completedTripsThisMonth: 0,
+      totalExpensesThisMonth: d.operationalCost,
+      fuelCostThisMonth: 0,
+      avgFuelEfficiency: d.fuelEfficiency,
+      maintenanceOpenCount: 0,
+      fleetUtilizationRate: d.fleetUtilization,
     };
   },
 

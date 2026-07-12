@@ -1,72 +1,58 @@
-import type { MaintenanceLog } from '../types';
-import { mockMaintenanceLogs } from '../data/mockData';
-import { vehicleService } from './vehicleService';
+import api from './api';
+import type { MaintenanceLog, MaintenanceStatus } from '../types';
 
-let logs: MaintenanceLog[] = [...mockMaintenanceLogs];
-
-const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const mapMaintenance = (m: any): MaintenanceLog => ({
+  id: m.id,
+  vehicleId: m.vehicle_id,
+  type: m.maintenance_type as any,
+  description: m.description ?? m.issue,
+  status: m.status as MaintenanceStatus,
+  reportedDate: m.start_date,
+  completedDate: m.end_date ?? undefined,
+  technicianName: '',
+  cost: m.cost,
+  mileageAtService: 0,
+  notes: m.issue,
+  createdAt: m.created_at,
+});
 
 export const maintenanceService = {
   async getAll(): Promise<MaintenanceLog[]> {
-    await delay();
-    return [...logs];
+    const res = await api.get('/maintenance/');
+    return res.data.items.map(mapMaintenance);
   },
 
   async getById(id: string): Promise<MaintenanceLog | null> {
-    await delay();
-    return logs.find((l) => l.id === id) ?? null;
+    const res = await api.get(`/maintenance/${id}`);
+    return mapMaintenance(res.data);
   },
 
   async getByVehicle(vehicleId: string): Promise<MaintenanceLog[]> {
-    await delay();
-    return logs.filter((l) => l.vehicleId === vehicleId);
+    const res = await api.get('/maintenance/', { params: { vehicle_id: vehicleId } });
+    return res.data.items.map(mapMaintenance);
   },
 
-  async create(data: Omit<MaintenanceLog, 'id' | 'createdAt'>): Promise<MaintenanceLog> {
-    await delay();
-    const newLog: MaintenanceLog = {
-      ...data,
-      id: `m${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    logs.push(newLog);
-    return { ...newLog };
-  },
-
-  async update(
-    id: string,
-    data: Partial<Omit<MaintenanceLog, 'id' | 'createdAt'>>,
-  ): Promise<MaintenanceLog> {
-    await delay();
-    const index = logs.findIndex((l) => l.id === id);
-    if (index === -1) throw new Error(`Maintenance log ${id} not found`);
-    logs[index] = { ...logs[index], ...data };
-    return { ...logs[index] };
+  async create(data: { vehicleId: string; maintenanceType: string; issue: string; description?: string; cost?: number; startDate: string }): Promise<MaintenanceLog> {
+    const res = await api.post('/maintenance/', {
+      vehicle_id: data.vehicleId,
+      maintenance_type: data.maintenanceType,
+      issue: data.issue,
+      description: data.description,
+      cost: data.cost ?? 0,
+      start_date: data.startDate,
+    });
+    return mapMaintenance(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    await delay();
-    const index = logs.findIndex((l) => l.id === id);
-    if (index === -1) throw new Error(`Maintenance log ${id} not found`);
-    logs.splice(index, 1);
+    await api.delete(`/maintenance/${id}`);
   },
 
-  async completeMaintenance(id: string): Promise<MaintenanceLog> {
-    await delay();
-    const index = logs.findIndex((l) => l.id === id);
-    if (index === -1) throw new Error(`Maintenance log ${id} not found`);
-    const log = logs[index];
-    if (log.status === 'Completed') throw new Error(`Maintenance ${id} is already completed`);
-
-    logs[index] = {
-      ...log,
-      status: 'Completed',
-      completedDate: new Date().toISOString().split('T')[0],
-    };
-
-    // Restore vehicle status to Available
-    vehicleService._updateStatusSync(log.vehicleId, 'Available');
-
-    return { ...logs[index] };
+  async completeMaintenance(id: string, endDate?: string, cost?: number): Promise<MaintenanceLog> {
+    const res = await api.patch(`/maintenance/${id}/close`, {
+      end_date: endDate ?? new Date().toISOString().split('T')[0],
+      cost,
+    });
+    return mapMaintenance(res.data);
   },
 };

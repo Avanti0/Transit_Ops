@@ -1,59 +1,67 @@
+import api from './api';
 import type { Vehicle, VehicleStatus } from '../types';
-import { mockVehicles } from '../data/mockData';
 
-// In-memory store seeded from mock data
-let vehicles: Vehicle[] = [...mockVehicles];
-
-const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+// Map backend snake_case to frontend camelCase
+const mapVehicle = (v: any): Vehicle => ({
+  id: v.id,
+  registrationNumber: v.registration_number,
+  make: v.name,
+  model: v.vehicle_type,
+  year: new Date(v.created_at).getFullYear(),
+  type: v.vehicle_type,
+  capacity: v.max_load_capacity,
+  status: v.status as VehicleStatus,
+  currentMileage: v.odometer,
+  lastServiceDate: v.created_at,
+  nextServiceDue: v.odometer + 5000,
+  fuelType: 'Diesel',
+  insuranceExpiry: '',
+  permitExpiry: '',
+  createdAt: v.created_at,
+});
 
 export const vehicleService = {
   async getAll(): Promise<Vehicle[]> {
-    await delay();
-    return [...vehicles];
+    const res = await api.get('/vehicles/');
+    return res.data.map(mapVehicle);
   },
 
   async getById(id: string): Promise<Vehicle | null> {
-    await delay();
-    return vehicles.find((v) => v.id === id) ?? null;
+    const res = await api.get(`/vehicles/${id}`);
+    return mapVehicle(res.data);
   },
 
   async create(data: Omit<Vehicle, 'id' | 'createdAt'>): Promise<Vehicle> {
-    await delay();
-    const newVehicle: Vehicle = {
-      ...data,
-      id: `v${Date.now()}`,
-      createdAt: new Date().toISOString(),
+    const payload = {
+      registration_number: data.registrationNumber,
+      name: data.make,
+      vehicle_type: data.type,
+      max_load_capacity: data.capacity,
+      odometer: data.currentMileage ?? 0,
+      acquisition_cost: 0,
+      region: null,
     };
-    vehicles.push(newVehicle);
-    return { ...newVehicle };
+    const res = await api.post('/vehicles/', payload);
+    return mapVehicle(res.data);
   },
 
   async update(id: string, data: Partial<Omit<Vehicle, 'id' | 'createdAt'>>): Promise<Vehicle> {
-    await delay();
-    const index = vehicles.findIndex((v) => v.id === id);
-    if (index === -1) throw new Error(`Vehicle ${id} not found`);
-    vehicles[index] = { ...vehicles[index], ...data };
-    return { ...vehicles[index] };
+    const payload: any = {};
+    if (data.registrationNumber) payload.registration_number = data.registrationNumber;
+    if (data.make) payload.name = data.make;
+    if (data.type) payload.vehicle_type = data.type;
+    if (data.capacity) payload.max_load_capacity = data.capacity;
+    if (data.currentMileage !== undefined) payload.odometer = data.currentMileage;
+    if (data.status) payload.status = data.status;
+    const res = await api.put(`/vehicles/${id}`, payload);
+    return mapVehicle(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    await delay();
-    const index = vehicles.findIndex((v) => v.id === id);
-    if (index === -1) throw new Error(`Vehicle ${id} not found`);
-    vehicles.splice(index, 1);
+    await api.delete(`/vehicles/${id}`);
   },
 
   async updateStatus(id: string, status: VehicleStatus): Promise<Vehicle> {
     return vehicleService.update(id, { status });
-  },
-
-  // Internal helper used by other services (no delay)
-  _updateStatusSync(id: string, status: VehicleStatus): void {
-    const v = vehicles.find((v) => v.id === id);
-    if (v) v.status = status;
-  },
-
-  _getAll(): Vehicle[] {
-    return vehicles;
   },
 };
