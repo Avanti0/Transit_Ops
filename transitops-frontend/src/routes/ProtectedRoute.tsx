@@ -3,13 +3,26 @@ import { authService } from '../services/authService';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  allowedRoles?: string[];
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   if (!authService.isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 
-  // Each page manages its own AppLayout — no double-wrapping here
+  if (allowedRoles) {
+    const raw = localStorage.getItem('transitops_user');
+    let userRole = '';
+    if (raw) {
+      try {
+        userRole = JSON.parse(raw).role;
+      } catch {}
+    }
+    if (!allowedRoles.includes(userRole)) {
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+
   return <>{children}</>;
 }

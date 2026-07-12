@@ -1,59 +1,82 @@
+import { api } from './api';
 import type { Vehicle, VehicleStatus } from '../types';
-import { mockVehicles } from '../data/mockData';
 
-// In-memory store seeded from mock data
-let vehicles: Vehicle[] = [...mockVehicles];
+function mapBackendToFrontend(bv: any): Vehicle {
+  const nameParts = (bv.name || '').split(' ');
+  const make = nameParts[0] || 'Unknown';
+  const model = nameParts.slice(1).join(' ') || 'Model';
+  return {
+    id: bv.id,
+    registrationNumber: bv.registration_number,
+    make: make,
+    model: model,
+    year: 2022,
+    type: bv.vehicle_type as any,
+    capacity: bv.max_load_capacity,
+    status: bv.status,
+    currentMileage: bv.odometer,
+    lastServiceDate: new Date().toISOString().split('T')[0],
+    nextServiceDue: bv.odometer + 5000,
+    fuelType: 'Diesel',
+    insuranceExpiry: new Date().toISOString().split('T')[0],
+    permitExpiry: new Date().toISOString().split('T')[0],
+    createdAt: bv.created_at || new Date().toISOString(),
+  };
+}
 
-const delay = (ms = 300) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+function mapFrontendToBackend(v: any) {
+  return {
+    registration_number: v.registrationNumber,
+    name: `${v.make} ${v.model}`,
+    vehicle_type: v.type,
+    max_load_capacity: Number(v.capacity),
+    odometer: Number(v.currentMileage),
+    acquisition_cost: 25000.0,
+    status: v.status,
+    region: 'North',
+  };
+}
 
 export const vehicleService = {
   async getAll(): Promise<Vehicle[]> {
-    await delay();
-    return [...vehicles];
+    const res = await api.get('/vehicles/');
+    return res.data.map(mapBackendToFrontend);
   },
 
   async getById(id: string): Promise<Vehicle | null> {
-    await delay();
-    return vehicles.find((v) => v.id === id) ?? null;
+    const res = await api.get(`/vehicles/${id}`);
+    return mapBackendToFrontend(res.data);
   },
 
   async create(data: Omit<Vehicle, 'id' | 'createdAt'>): Promise<Vehicle> {
-    await delay();
-    const newVehicle: Vehicle = {
-      ...data,
-      id: `v${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    vehicles.push(newVehicle);
-    return { ...newVehicle };
+    const payload = mapFrontendToBackend(data);
+    const res = await api.post('/vehicles/', payload);
+    return mapBackendToFrontend(res.data);
   },
 
   async update(id: string, data: Partial<Omit<Vehicle, 'id' | 'createdAt'>>): Promise<Vehicle> {
-    await delay();
-    const index = vehicles.findIndex((v) => v.id === id);
-    if (index === -1) throw new Error(`Vehicle ${id} not found`);
-    vehicles[index] = { ...vehicles[index], ...data };
-    return { ...vehicles[index] };
+    const existing = await api.get(`/vehicles/${id}`);
+    const updatedPayload = {
+      ...mapFrontendToBackend({ ...mapBackendToFrontend(existing.data), ...data }),
+    };
+    const res = await api.put(`/vehicles/${id}`, updatedPayload);
+    return mapBackendToFrontend(res.data);
   },
 
   async delete(id: string): Promise<void> {
-    await delay();
-    const index = vehicles.findIndex((v) => v.id === id);
-    if (index === -1) throw new Error(`Vehicle ${id} not found`);
-    vehicles.splice(index, 1);
+    await api.delete(`/vehicles/${id}`);
   },
 
   async updateStatus(id: string, status: VehicleStatus): Promise<Vehicle> {
-    return vehicleService.update(id, { status });
+    return this.update(id, { status });
   },
 
-  // Internal helper used by other services (no delay)
+  // Internal compatibility helpers
   _updateStatusSync(id: string, status: VehicleStatus): void {
-    const v = vehicles.find((v) => v.id === id);
-    if (v) v.status = status;
+    // No-op for compatibility as real backend handles state transitions
   },
 
   _getAll(): Vehicle[] {
-    return vehicles;
+    return [];
   },
 };

@@ -10,6 +10,43 @@ from backend.utils.exceptions import register_exception_handlers
 
 Base.metadata.create_all(bind=engine)
 
+# Auto-seed roles and users if not present
+from backend.database.session import SessionLocal
+from backend.models.user import Role, User
+from backend.utils.auth import hash_password
+db = SessionLocal()
+try:
+    existing_roles = [r.role_name for r in db.query(Role).all()]
+    required_roles = ["Fleet Manager", "Safety Officer", "Financial Analyst", "Driver/Dispatcher"]
+    for role_name in required_roles:
+        if role_name not in existing_roles:
+            db.add(Role(role_name=role_name))
+    db.commit()
+
+    # Seed demo users corresponding to frontend login cards
+    roles_map = {r.role_name: r.id for r in db.query(Role).all()}
+    demo_users = [
+        {"name": "Admin User", "email": "admin@transitops.com", "password": "admin123", "role": "Fleet Manager"},
+        {"name": "Ravi Kumar", "email": "driver@transitops.com", "password": "driver123", "role": "Driver/Dispatcher"},
+        {"name": "Safety Officer", "email": "safety@transitops.com", "password": "safety123", "role": "Safety Officer"},
+        {"name": "Finance Analyst", "email": "finance@transitops.com", "password": "finance123", "role": "Financial Analyst"},
+    ]
+    for du in demo_users:
+        if not db.query(User).filter(User.email == du["email"]).first():
+            role_id = roles_map.get(du["role"])
+            if role_id:
+                db.add(User(
+                    name=du["name"],
+                    email=du["email"],
+                    password_hash=hash_password(du["password"]),
+                    role_id=role_id
+                ))
+    db.commit()
+except Exception as e:
+    print(f"Error seeding database: {e}")
+finally:
+    db.close()
+
 tags_metadata = [
     {
         "name": "Auth",
