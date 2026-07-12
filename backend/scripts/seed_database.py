@@ -1,7 +1,7 @@
 """
 Database seeding script for TransitOps.
 
-This script reads vehicles.csv and seeds the vehicles table.
+This script reads vehicles.csv and drivers.csv and seeds the database.
 
 Usage:
     python -m backend.scripts.seed_database
@@ -10,6 +10,7 @@ Usage:
 import os
 import sys
 import csv
+import datetime
 from pathlib import Path
 
 # Add project root to path for imports
@@ -20,10 +21,12 @@ from sqlalchemy.orm import Session
 from backend.database.session import SessionLocal, engine
 from backend.database.base import Base
 from backend.models.vehicle import Vehicle, VehicleStatus
+from backend.models.driver import Driver, DriverStatus
 
 # CSV file paths
 DATA_DIR = Path(__file__).parent.parent / "data"
 VEHICLES_CSV = DATA_DIR / "vehicles.csv"
+DRIVERS_CSV = DATA_DIR / "drivers.csv"
 
 
 def get_db_session() -> Session:
@@ -93,10 +96,8 @@ def seed_vehicles(db: Session):
     seen_registrations = set()
 
     with open(VEHICLES_CSV, "r", encoding="utf-8", errors="replace") as f:
-        # Use DictReader to parse headers
         reader = csv.DictReader(f)
         
-        # If headers are missing or reader has no fieldnames, handle empty/corrupt files gracefully
         if not reader.fieldnames:
             print("Total rows: 0")
             print("Inserted: 0")
@@ -152,11 +153,126 @@ def seed_vehicles(db: Session):
     print(f"Skipped: {skipped}")
 
 
+def validate_driver(row: dict) -> bool:
+    """
+    Validates that a row from drivers.csv contains all required fields and correct formats.
+    """
+    # Required text fields
+    if not row.get("name") or not row["name"].strip():
+        return False
+    if not row.get("license_number") or not row["license_number"].strip():
+        return False
+    if not row.get("license_category") or not row["license_category"].strip():
+        return False
+    if not row.get("contact_number") or not row["contact_number"].strip():
+        return False
+        
+    # Required expiry date field
+    expiry_str = row.get("license_expiry")
+    if not expiry_str or not expiry_str.strip():
+        return False
+    try:
+        datetime.date.fromisoformat(expiry_str.strip())
+    except ValueError:
+        return False
+        
+    # Required numeric field (safety_score)
+    try:
+        score = float(row["safety_score"])
+        if score < 0.0 or score > 100.0:
+            return False
+    except (ValueError, TypeError, KeyError):
+        return False
+        
+    # Optional status validation
+    status_str = row.get("status")
+    if status_str and status_str.strip():
+        try:
+            DriverStatus(status_str.strip())
+        except ValueError:
+            return False
+            
+    return True
+
+
+def seed_drivers(db: Session):
+    """
+    Seeds drivers from drivers.csv.
+    """
+    if not DRIVERS_CSV.exists():
+        print(f"[ERROR] drivers.csv not found at {DRIVERS_CSV}")
+        return
+
+    total_rows = 0
+    inserted = 0
+    skipped = 0
+    seen_licenses = set()
+
+    with open(DRIVERS_CSV, "r", encoding="utf-8", errors="replace") as f:
+        reader = csv.DictReader(f)
+        
+        if not reader.fieldnames:
+            print("Total rows: 0")
+            print("Inserted: 0")
+            print("Skipped: 0")
+            return
+            
+        for row in reader:
+            total_rows += 1
+            
+            # Validate row
+            if not validate_driver(row):
+                skipped += 1
+                continue
+                
+            lic = row["license_number"].strip()
+            
+            # Check duplicate in current file
+            if lic in seen_licenses:
+                skipped += 1
+                continue
+                
+            # Check duplicate in DB
+            db_driver = db.query(Driver).filter(Driver.license_number == lic).first()
+            if db_driver:
+                skipped += 1
+                seen_licenses.add(lic)
+                continue
+                
+            seen_licenses.add(lic)
+            
+            # Map status
+            status_val = DriverStatus.AVAILABLE
+            status_str = row.get("status")
+            if status_str and status_str.strip():
+                status_val = DriverStatus(status_str.strip())
+                
+            driver = Driver(
+                name=row["name"].strip(),
+                license_number=lic,
+                license_category=row["license_category"].strip(),
+                license_expiry=datetime.date.fromisoformat(row["license_expiry"].strip()),
+                contact_number=row["contact_number"].strip(),
+                safety_score=float(row["safety_score"]),
+                status=status_val
+            )
+            db.add(driver)
+            inserted += 1
+
+    db.commit()
+    print(f"Total rows: {total_rows}")
+    print(f"Inserted: {inserted}")
+    print(f"Skipped: {skipped}")
+
+
 def main():
     create_tables()
     db = get_db_session()
     try:
+        print("Seeding Vehicles...")
         seed_vehicles(db)
+        print("Seeding Drivers...")
+        seed_drivers(db)
     except Exception as e:
         db.rollback()
         print(f"[ERROR] Error during seeding: {e}")
