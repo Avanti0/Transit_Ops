@@ -102,6 +102,13 @@ class Vehicle(Base):
         cascade="all, delete-orphan"
     )
 
+    # One-to-many relationship with Fuel logs
+    fuel_logs: Mapped[list["FuelLog"]] = relationship(
+        "FuelLog",
+        back_populates="vehicle",
+        cascade="all, delete-orphan"
+    )
+
     __table_args__ = (
         CheckConstraint("max_load_capacity >= 0.0", name="check_vehicle_max_load_capacity"),
         CheckConstraint("odometer >= 0.0", name="check_vehicle_odometer"),
