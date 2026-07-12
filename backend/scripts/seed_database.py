@@ -9,13 +9,17 @@ This script seeds the database in a single transaction and is fully idempotent:
 5. Expenses
 
 Usage:
-    python -m backend.scripts.seed_database
+    python backend/scripts/seed_database.py [options]
+    or (from backend directory)
+    python scripts/seed_database.py [options]
 """
 
 import os
 import sys
 import csv
 import datetime
+import argparse
+import time
 from pathlib import Path
 from typing import Tuple
 
@@ -99,6 +103,7 @@ def seed_vehicles(db: Session) -> Tuple[int, int]:
     Seeds vehicles from vehicles.csv. Flushes changes and returns (inserted, skipped).
     """
     if not VEHICLES_CSV.exists():
+        print(f"[ERROR] vehicles.csv not found at: {VEHICLES_CSV}")
         return 0, 0
 
     inserted = 0
@@ -197,6 +202,7 @@ def seed_drivers(db: Session) -> Tuple[int, int]:
     Seeds drivers from drivers.csv. Flushes changes and returns (inserted, skipped).
     """
     if not DRIVERS_CSV.exists():
+        print(f"[ERROR] drivers.csv not found at: {DRIVERS_CSV}")
         return 0, 0
 
     inserted = 0
@@ -300,6 +306,7 @@ def seed_maintenance(db: Session) -> Tuple[int, int]:
     Seeds maintenance logs from maintenance.csv. Flushes changes and returns (inserted, skipped).
     """
     if not MAINTENANCE_CSV.exists():
+        print(f"[ERROR] maintenance.csv not found at: {MAINTENANCE_CSV}")
         return 0, 0
 
     # Build a lookup map of registration_number -> vehicle_id
@@ -406,6 +413,7 @@ def seed_fuel_logs(db: Session) -> Tuple[int, int]:
     Seeds fuel logs from fuel_logs.csv. Flushes changes and returns (inserted, skipped).
     """
     if not FUEL_LOGS_CSV.exists():
+        print(f"[ERROR] fuel_logs.csv not found at: {FUEL_LOGS_CSV}")
         return 0, 0
 
     # Build a lookup map of registration_number -> vehicle_id
@@ -499,6 +507,7 @@ def seed_expenses(db: Session) -> Tuple[int, int]:
     Seeds expenses from expenses.csv. Flushes changes and returns (inserted, skipped).
     """
     if not EXPENSES_CSV.exists():
+        print(f"[ERROR] expenses.csv not found at: {EXPENSES_CSV}")
         return 0, 0
 
     # Build a lookup map of registration_number -> vehicle_id
@@ -552,29 +561,77 @@ def seed_expenses(db: Session) -> Tuple[int, int]:
 
 
 def main():
+    parser = argparse.ArgumentParser(description="TransitOps Database Seeding Command Line Interface")
+    parser.add_argument("--vehicles", action="store_true", help="Seed vehicles table")
+    parser.add_argument("--drivers", action="store_true", help="Seed drivers table")
+    parser.add_argument("--maintenance", action="store_true", help="Seed maintenance table")
+    parser.add_argument("--fuel", action="store_true", help="Seed fuel logs table")
+    parser.add_argument("--expenses", action="store_true", help="Seed expenses table")
+    parser.add_argument("--all", action="store_true", help="Seed all tables (default if no flag is specified)")
+    
+    args = parser.parse_args()
+    
+    # If no flags are provided, run all by default
+    run_all = args.all or not (args.vehicles or args.drivers or args.maintenance or args.fuel or args.expenses)
+    
     create_tables()
     db = get_db_session()
+    
+    start_time = time.time()
+    
     try:
-        # Run seeders sequentially in a single transaction
-        v_ins, v_skip = seed_vehicles(db)
-        d_ins, d_skip = seed_drivers(db)
-        m_ins, m_skip = seed_maintenance(db)
-        f_ins, f_skip = seed_fuel_logs(db)
-        e_ins, e_skip = seed_expenses(db)
+        v_ins, v_skip = 0, 0
+        d_ins, d_skip = 0, 0
+        m_ins, m_skip = 0, 0
+        f_ins, f_skip = 0, 0
+        e_ins, e_skip = 0, 0
         
-        # Commit only if all succeed
+        if run_all or args.vehicles:
+            print("[INFO] Seeding Vehicles...")
+            v_ins, v_skip = seed_vehicles(db)
+            
+        if run_all or args.drivers:
+            print("[INFO] Seeding Drivers...")
+            d_ins, d_skip = seed_drivers(db)
+            
+        if run_all or args.maintenance:
+            print("[INFO] Seeding Maintenance logs...")
+            m_ins, m_skip = seed_maintenance(db)
+            
+        if run_all or args.fuel:
+            print("[INFO] Seeding Fuel Logs...")
+            f_ins, f_skip = seed_fuel_logs(db)
+            
+        if run_all or args.expenses:
+            print("[INFO] Seeding Expenses...")
+            e_ins, e_skip = seed_expenses(db)
+            
+        # Commit transaction only if all selected runs succeed
         db.commit()
         
-        # Print master summary with skipped counts
-        print(f"Vehicles: {v_ins} inserted, {v_skip} skipped")
-        print(f"Drivers: {d_ins} inserted, {d_skip} skipped")
-        print(f"Maintenance: {m_ins} inserted, {m_skip} skipped")
-        print(f"Fuel Logs: {f_ins} inserted, {f_skip} skipped")
-        print(f"Expenses: {e_ins} inserted, {e_skip} skipped")
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        print("\n" + "=" * 50)
+        print("TransitOps Seeding Execution Summary")
+        print("=" * 50)
+        if run_all or args.vehicles:
+            print(f"Vehicles: {v_ins} inserted, {v_skip} skipped")
+        if run_all or args.drivers:
+            print(f"Drivers: {d_ins} inserted, {d_skip} skipped")
+        if run_all or args.maintenance:
+            print(f"Maintenance: {m_ins} inserted, {m_skip} skipped")
+        if run_all or args.fuel:
+            print(f"Fuel Logs: {f_ins} inserted, {f_skip} skipped")
+        if run_all or args.expenses:
+            print(f"Expenses: {e_ins} inserted, {e_skip} skipped")
+        print("-" * 50)
+        print(f"Seeding completed successfully in {duration:.2f} seconds.")
+        print("=" * 50)
         
     except Exception as e:
         db.rollback()
-        print(f"[ERROR] Error during seeding: {e}")
+        print(f"\n[ERROR] Seeding aborted: {e}")
         raise
     finally:
         db.close()
