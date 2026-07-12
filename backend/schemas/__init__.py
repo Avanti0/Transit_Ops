@@ -1,6 +1,7 @@
 from backend.schemas.driver import DriverCreate, DriverUpdate, DriverResponse
 from backend.schemas.maintenance import MaintenanceCreate, MaintenanceUpdate, MaintenanceResponse
 from backend.schemas.fuel_log import FuelLogCreate, FuelLogUpdate, FuelLogResponse
+from backend.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse
 
 __all__ = [
     "DriverCreate",
@@ -12,4 +13,7 @@ __all__ = [
     "FuelLogCreate",
     "FuelLogUpdate",
     "FuelLogResponse",
+    "ExpenseCreate",
+    "ExpenseUpdate",
+    "ExpenseResponse",
 ]
