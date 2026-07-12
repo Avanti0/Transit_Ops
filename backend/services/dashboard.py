@@ -62,6 +62,18 @@ class DashboardService:
         
         # Total operational cost
         total_operational_cost = total_fuel_cost + total_maintenance_cost + total_expense_cost
+
+        # 5. Fleet average fuel efficiency from completed trips (sum distance / sum fuel)
+        completed_agg = self.db.query(
+            func.sum(Trip.actual_distance),
+            func.sum(Trip.fuel_consumed),
+        ).filter(Trip.status == TripStatus.COMPLETED).first()
+
+        total_distance = completed_agg[0] or 0.0
+        total_fuel_consumed = completed_agg[1] or 0.0
+        fuel_efficiency = 0.0
+        if total_fuel_consumed > 0:
+            fuel_efficiency = round(total_distance / total_fuel_consumed, 2)
         
         return DashboardKPIs(
             total_vehicles=total_vehicles,
@@ -73,6 +85,7 @@ class DashboardService:
             pending_trips=pending_trips,
             drivers_on_duty=drivers_on_duty,
             fleet_utilization_percentage=fleet_utilization,
+            fuel_efficiency=fuel_efficiency,
             total_fuel_cost=round(total_fuel_cost, 2),
             total_maintenance_cost=round(total_maintenance_cost, 2),
             total_operational_cost=round(total_operational_cost, 2)

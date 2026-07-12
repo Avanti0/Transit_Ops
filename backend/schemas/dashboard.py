@@ -40,6 +40,10 @@ class DashboardKPIs(BaseModel):
         ..., 
         description="Percentage of the active fleet compared to total vehicles (excluding retired)"
     )
+    fuel_efficiency: float = Field(
+        default=0.0,
+        description="Fleet average fuel efficiency (km/L) computed from completed trips"
+    )
     total_fuel_cost: float = Field(
         ..., 
         description="Sum of all costs from fuel logs"

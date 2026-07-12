@@ -4,21 +4,32 @@ import type { User, LoginCredentials, LoginResponse } from '../types';
 const STORAGE_KEY = 'transitops_user';
 const TOKEN_KEY = 'transitops_token';
 
+/** Map backend UserResponse snake_case → frontend User camelCase */
+function mapUser(raw: any): User {
+  return {
+    id: raw.id ?? '',
+    name: raw.name ?? '',
+    email: raw.email ?? '',
+    // Backend returns role as { id, role_name } nested object
+    role: (raw.role?.role_name ?? raw.role ?? 'Fleet Manager') as User['role'],
+    createdAt: raw.created_at ?? new Date().toISOString(),
+  };
+}
+
 export const authService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const res = await api.post('/auth/login', credentials);
-    const { access_token } = res.data;
+    // 1. Exchange credentials for a JWT token
+    const tokenRes = await api.post('/auth/login', credentials);
+    const { access_token } = tokenRes.data;
 
-    // Decode user info from token or fetch from /auth/me if available
-    const user: User = {
-      id: '',
-      name: credentials.email.split('@')[0],
-      email: credentials.email,
-      role: 'Fleet Manager',
-      createdAt: new Date().toISOString(),
-    };
-
+    // 2. Store the token so the next request carries it
     localStorage.setItem(TOKEN_KEY, access_token);
+
+    // 3. Fetch real user profile (id, name, role) from /auth/me
+    const meRes = await api.get('/auth/me');
+    const user = mapUser(meRes.data);
+
+    // 4. Persist the resolved profile
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
     return { user, token: access_token };
   },
