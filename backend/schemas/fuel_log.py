@@ -79,3 +79,14 @@ class FuelLogResponse(FuelLogBase):
             }
         }
     )
+
+
+class FuelLogPaginatedResponse(BaseModel):
+    """
+    Pydantic schema for paginated Fuel Log responses.
+    """
+    total: int = Field(..., description="Total count of matching fuel log records")
+    skip: int = Field(..., description="Number of items skipped")
+    limit: int = Field(..., description="Maximum number of items returned")
+    items: list[FuelLogResponse] = Field(..., description="List of fuel log records in the current page")
+
